@@ -80,7 +80,8 @@ DEFS								= -D$(MODEL_DEFINE) \
 											-DHSE_VALUE=$(F_CRYSTAL) \
 											-DF_CPU=$(F_CPU) \
 											-DF_CRYSTAL=$(F_CRYSTAL) \
-											-D$(SYSCLOCK)=$(F_CPU)
+											-D$(SYSCLOCK)=$(F_CPU) \
+											-DUSE_FULL_ASSERT
 
 								#+ -DUSE_OTG_MODE \
 								#+ -DUSE_HOST_MODE \
@@ -126,7 +127,6 @@ WARNINGS							= -Wall \
 												-Wunused
 
 CFLAGS 							= 	$(WARNINGS) \
-												$(INCFLAGS) \
 												$(DEFS) \
 												$(ARCHFLAGS) \
 												-std=gnu99 \
@@ -154,8 +154,7 @@ LINKER_SCRIPT 				=	libstm32f4/linker_scripts/stm32f407vg_flash.ld
 
 LDFLAGS 							= $(ARCHFLAGS) \
 												$(DEFS) \
-												$(INCFLAGS) \
-												-O2 -g3 \
+												-O0 -g3 \
 												-Wl,--gc-sections \
 												-Wl,--relax \
 												-Wl,-Map=$(BUILD_DIR)$(TARGET).map \
@@ -167,7 +166,7 @@ LDFLAGS 							= $(ARCHFLAGS) \
 # libraries definition
 # ------------------------------------------------------------------------------
 # cmsis DSP_Lib
-LIBCMSISDSP 					:= $(LIBDIR)/libcmsisdsp.a
+LIBCMSISDSP 					:= $(LIBDIR)libcmsisdsp.a
 LIBS									+= $(LIBCMSISDSP)
 LDLIBS								+= -lcmsisdsp
 
@@ -177,7 +176,7 @@ LDLIBS								+= -lcmsisdsp
 VPATH 								= $(PACKAGES)
 CC_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.cc,$(PACKAGES))))
 C_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.c,$(PACKAGES))))
-AS_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.as,$(PACKAGES))))
+AS_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.S,$(PACKAGES))))
 
 TARGET_BIN 						= $(BUILD_DIR)$(TARGET).bin
 TARGET_ELF 						= $(BUILD_DIR)$(TARGET).elf
@@ -195,14 +194,24 @@ STARTUP_OBJ 					= $(BUILD_DIR)startup_stm32f4xx.o
 # ------------------------------------------------------------------------------
 # Files and directories for the system firmware
 # ------------------------------------------------------------------------------
-FW_STDDRIVER_DIR 			= $(STM32_PATH)STM32F4xx_HAL_Driver
-FW_CMSIS_DIR 					= $(STM32_PATH)CMSIS
-FW_STARTUP_DIR 				= $(FW_CMSIS_DIR)Device
-FW_CMSIS_CORE_DIR			= $(FW_CMSIS_DIR)inc
-FW_CMSIS_STM32F4_DIR	= $(FW_CMSIS_DIR)Device
-FW_CMSIS_RTOS_DIR			= $(FW_CMSIS_DIR)RTOS
-FW_DISCOVERY_DIR			= $(STM32_PATH)BSP/STM32F4-Discovery
-FW_COMPONENTS_DIR			= $(STM32_PATH)BSP/Components
+FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver
+FW_CMSIS_DIR 							= $(STM32_PATH)CMSIS
+FW_STARTUP_DIR 						= $(FW_CMSIS_DIR)Device
+FW_CMSIS_CORE_DIR					= $(FW_CMSIS_DIR)inc
+FW_CMSIS_STM32F4_DIR			= $(FW_CMSIS_DIR)Device
+FW_CMSIS_RTOS_DIR					= $(FW_CMSIS_DIR)RTOS
+#+ FW_CMSIS_DSP_DIR 					= $(FW_CMSIS_DIR)DSP_Lib
+
+FW_DISCOVERY_DIR					= $(STM32_PATH)BSP/STM32F4-Discovery
+FW_COMPONENTS_DIR					= $(STM32_PATH)BSP/Components
+FW_CS43L22_DIR						= $(FW_COMPONENTS_DIR)cs43l22
+FW_LIS3DSH_DIR						= $(FW_COMPONENTS_DIR)lis3dsh
+FW_LIS302DL_DIR						= $(FW_COMPONENTS_DIR)lis302dl
+FW_COMMON_COMPONENTS_DIR	= $(FW_COMPONENTS_DIR)Common
+
+FW_MIDDLEWARE_DIR					= $(STM32_PATH)MiddleWares
+FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
+
 #+ FW_USB_DIR 						= $(STM32_PATH)/STM32_USB-FS-Device_Driver
 
 FW_STDDRIVER_SRCDIR 	= $(FW_STDDRIVER_DIR)/src
@@ -213,46 +222,81 @@ FW_STDDRIVER_INCDIR 	= $(FW_STDDRIVER_DIR)/inc
 
 FW_BUILD_DIR 					= $(BUILD_ROOT)stm_firmware/
 
-INCFLAGS 							+= -I$(STM32_PATH) -I$(FW_CORE_DIR) -I$(FW_STARTUP_DIR) -I$(FW_STDDRIVER_INCDIR)
-VPATH 								+= $(FW_CORE_DIR) $(FW_STARTUP_DIR) $(FW_STDDRIVER_SRCDIR) $(STM32_PATH) $(FW_BUILD_DIR)
-CORE_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_CORE_DIR))))
-DRIVERS_C_FILES 			= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_STDDRIVER_SRCDIR))))
-USB_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_USB_SRCDIR))))
-C_FILES 							+= $(CORE_C_FILES)
-C_FILES 							+= $(DRIVERS_C_FILES)
+#+ INCFLAGS 							+= -I$(STM32_PATH) -I$(FW_CORE_DIR) -I$(FW_STARTUP_DIR) -I$(FW_STDDRIVER_INCDIR)
+INCFLAGS 							+= -I$(STM32_PATH) \
+												 -I$(FW_STDDRIVER_INCDIR) \
+												 -I$(FW_CMSIS_STM32F4_DIR) \
+												 -I$(FW_CMSIS_CORE_DIR) \
+												 -I$(FW_CMSIS_RTOS_DIR) \
+												 -I$(FW_DISCOVERY_DIR) \
+												 -I$(FW_COMMON_COMPONENTS_DIR) \
+												 -I$(FW_CS43L22_DIR) \
+												 -I$(FW_LIS3DSH_DIR) \
+												 -I$(FW_LIS302DL_DIR) \
+												 -I$(FW_AUDIO_PDM_DIR)  
 
-ifeq ($(USB),enabled)
-INCFLAGS 							+= -I$(FW_USB_INCDIR)
-VPATH 								+= $(FW_USB_SRCDIR)
-C_FILES 							+= $(USB_C_FILES)
-endif
+VPATH 								+= $(FW_STARTUP_DIR) \
+												 $(FW_CMSIS_STM32F4_DIR) \
+												 $(FW_STDDRIVER_SRCDIR) \
+												 $(FW_DISCOVERY_DIR) \
+												 $(FW_COMMON_COMPONENTS_DIR) \
+												 $(FW_CS43L22_DIR) \
+												 $(FW_LIS3DSH_DIR) \
+												 $(FW_LIS302DL_DIR) \
+												 $(FW_BUILD_DIR)
+
+CORE_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_CMSIS_STM32F4_DIR))))
+DRIVERS_C_FILES 			= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_STDDRIVER_SRCDIR))))
+DISCOVERY_C_FILES			= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_DISCOVERY_DIR) $(FW_COMMON_COMPONENTS_DIR) $(FW_CS43L22_DIR) $(FW_LIS3DSH_DIR) $(FW_LIS302DL_DIR))))
+#+ USB_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_USB_SRCDIR))))
+
+C_FILES 							+= 	$(CORE_C_FILES) \
+													$(DRIVERS_C_FILES) \
+													$(DISCOVERY_C_FILES)
+
+#+ ifeq ($(USB),enabled)
+#+ INCFLAGS 							+= -I$(FW_USB_INCDIR)
+#+ VPATH 								+= $(FW_USB_SRCDIR)
+#+ C_FILES 							+= $(USB_C_FILES)
+#+ endif
 
 # ------------------------------------------------------------------------------
 # Source compiling and dependency analysis
 # ------------------------------------------------------------------------------
-$(BUILD_DIR)%.o: %.s
-	$(CC) -c -x assembler-with-cpp $(ASFLAGS) $< -o $@
+$(BUILD_DIR)%.o: %.S
+	$(CC) -c -x assembler-with-cpp $(ASFLAGS) $(INCFLAGS) $< -o $@
 
 $(BUILD_DIR)%.o: %.c
-	$(CC) -c $(CFLAGS) -std=c99 $< -o $@
+	$(CC) -c $(CFLAGS) $(INCFLAGS) $< -o $@
 
 $(BUILD_DIR)%.o: %.cc
-	$(CXX) -c $(CFLAGS) $(CXXFLAGS) $< -o $@
+	$(CXX) -c $(CFLAGS) $(CXXFLAGS) $(INCFLAGS) $< -o $@
 
-$(BUILD_DIR)%.d: %.s
-	$(CC) -c -x assembler-with-cpp -MM $(ASFLAGS) $< -MF $@ -MT $(@:.d=.o)
+$(BUILD_DIR)%.d: %.S
+	$(CC) -c -x assembler-with-cpp -MM $(ASFLAGS) $(INCFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
 $(BUILD_DIR)%.d: %.c
-	$(CC) -MM $(CFLAGS) $< -MF $@ -MT $(@:.d=.o)
+	$(CC) -MM $(CFLAGS) $(INCFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
 $(BUILD_DIR)%.d: %.cc
-	$(CXX) -MM $(CFLAGS) $(CXXFLAGS) $< -MF $@ -MT $(@:.d=.o)
+	$(CXX) -MM $(CFLAGS) $(CXXFLAGS) $(INCFLAGS) $< -MF $@ -MT $(@:.d=.o)
+
+# ------------------------------------------------------------------------------
+# elf generator / linker
+# ------------------------------------------------------------------------------
+$(BUILD_DIR)%.elf: $(OBJS)
+	$(CC) $(LDFLAGS) $(INCFLAGS) $^ $(LDLIBS) -o $@
+
+$(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
 # ------------------------------------------------------------------------------
 # Object file conversion
 # ------------------------------------------------------------------------------
-$(BUILD_DIR)%.hex: $(BUILD_DIR)%.elf
+$(BUILD_DIR)%.ihex: $(BUILD_DIR)%.elf
 	$(OBJCOPY) -O ihex $< $@
+
+$(BUILD_DIR)%.hex: $(BUILD_DIR)%.elf
+	$(HEXDUMP) -e '1/2 "%04x" "\n"' $< -v > $@
 
 $(BUILD_DIR)%.bin: $(BUILD_DIR)%.elf
 	$(OBJCOPY) -O binary $< $@
@@ -262,6 +306,16 @@ $(BUILD_DIR)%.lss: $(BUILD_DIR)%.elf
 
 $(BUILD_DIR)%.sym: $(BUILD_DIR)%.elf
 	$(NM) -n $< > $@
+
+$(BUILD_DIR)%.dis: $(BUILD_DIR)%.elf
+	$(OBJDUMP) -h -d $^ > $@
+
+$(BUILD_DIR)$(TARGET).top_symbols: $(TARGET_ELF)
+	$(NM) $< --size-sort -C -f bsd -r > $@
+
+$(TARGET_SIZE): $(TARGET_ELF)
+	$(SIZE) $(TARGET_ELF) > $(TARGET_SIZE)
+
 # ------------------------------------------------------------------------------
 # What to build
 # ------------------------------------------------------------------------------
@@ -269,17 +323,7 @@ OBJ_FILES = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.S=.o)
 OBJS = $(patsubst %,$(BUILD_DIR)%,$(OBJ_FILES)) $(STARTUP_OBJ)
 DEPS = $(OBJS:.o=.d)
 
-all: $(BUILD_DIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_DIS) $(TARGET_SYM) $(TARGET_LSS) size ramsize
-
-# ------------------------------------------------------------------------------
-# Resources
-# ------------------------------------------------------------------------------
-RESOURCE_COMPILER = libstm32f4/tools/resources_compiler.py
-
-resources: $(TARGET)/resources.cc
-
-$(TARGET)/resources.cc: $(wildcard $(RESOURCES)/*.py)
-	python $(RESOURCE_COMPILER) $(RESOURCES)/resources.py
+all: $(BUILD_DIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) size ramsize
 
 # ------------------------------------------------------------------------------
 # Main rules
@@ -287,27 +331,11 @@ $(TARGET)/resources.cc: $(wildcard $(RESOURCES)/*.py)
 $(BUILD_DIR):
 	mkdir -p $(BUILD_DIR)
 
-$(TARGET_ELF): $(OBJS)
-	$(CC) $(LDFLAGS) -o $(TARGET_ELF) $(OBJS)
-
 $(DEP_FILE): $(BUILD_DIR) $(DEPS)
 	cat $(DEPS) > $(DEP_FILE)
 
-bin: $(TARGET_BIN)
-
-hex: $(TARGET_HEX)
-
 clean:
-	$(REMOVE) $(OBJS) $(TARGETS) $(DEP_FILE) $(DEPS)
-
-depends: $(DEPS)
-	cat $(DEPS) > $(DEP_FILE)
-
-$(TARGET_SIZE): $(TARGET_ELF)
-	$(SIZE) $(TARGET_ELF) > $(TARGET_SIZE)
-
-$(BUILD_DIR)$(TARGET).top_symbols: $(TARGET_ELF)
-	$(NM) $(TARGET_ELF) --size-sort -C -f bsd -r > $@
+	$(REMOVE) $(OBJS) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS)
 
 size: $(TARGET_SIZE)
 	cat $(TARGET_SIZE) | awk '{ print $$1+$$2 }' | tail -n1 $(FORMAT_SIZE)
@@ -315,9 +343,7 @@ size: $(TARGET_SIZE)
 ramsize: $(TARGET_SIZE)
 	cat $(TARGET_SIZE) | awk '{ print $$2+$$3 }' | tail -n1 $(FORMAT_RAMSIZE)
 
-disassemble: build/$(TARGET)/$(TARGET).lss build/$(TARGET)/$(TARGET).top_symbols
-
-.PHONY: all bin clean depends resources
+.PHONY: all clean
 
 include $(DEP_FILE)
 
