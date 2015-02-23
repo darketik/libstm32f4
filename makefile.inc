@@ -78,6 +78,7 @@ ARCHFLAGS 					= -mcpu=cortex-m4 \
 DEFS								= -D$(MODEL_DEFINE) \
 											$(APPLICATION_DEFINE) \
 											$(COPTDEFS) \
+											$(CSEMIHOSTDEFS) \
 											-DUSE_STDPERIPH_DRIVER \
 											-DUSE_STM32F4_DISCOVERY \
 											-D__VFP_FP__ \
@@ -129,7 +130,20 @@ COPTFLAGS							= -O2
 ASOPTFLAGS						= 
 endif
 
-#  -flto
+## TODO how to make -flto option work ??
+
+SEMIHOST							?= disable
+ifeq ($(SEMIHOST), disable)
+LDSEMIHOSTFLAGS				=  
+CSEMIHOSTDEFS					=  
+OPENOCDSEMIHOSTCMD		=
+endif
+ifeq ($(SEMIHOST), enable)
+LDSEMIHOSTFLAGS				= --specs=rdimon.specs
+CSEMIHOSTDEFS					= -DSEMIHOST
+OPENOCDSEMIHOSTCMD		= -c "arm semihosting enable"
+endif
+
 
 INCFLAGS 							= -I. 
 
@@ -179,14 +193,14 @@ ASFLAGS 							= $(ARCHFLAGS) \
 LINKER_SCRIPT 				=	libstm32f4/linker_scripts/stm32f407vg_flash.ld
 
 LDFLAGS 							= $(CFLAGS) \
+												$(LDSEMIHOSTFLAGS) \
+												--specs=nano.specs \
 												-Wl,--gc-sections \
 												-Wl,--relax \
 												-Wl,-Map=$(BUILD_DIR)$(TARGET).map \
 												-T $(LINKER_SCRIPT) \
 												-L$(LIBDIR) \
 												-L$(FW_AUDIO_PDM_DIR)
-
-											#	--spec=nano.specs \
 
 # ------------------------------------------------------------------------------
 # libraries definition
@@ -232,8 +246,6 @@ TARGET_LSS 						= $(BUILD_DIR)$(TARGET).lss
 TARGET_TOPSYM 				= $(BUILD_DIR)$(TARGET).top_symbols
 TARGETS 							= $(BUILD_DIR)$(TARGET).*
 DEP_FILE 							= $(BUILD_DIR)depends.mk
-
-#STARTUP_OBJ 					= $(BUILD_DIR)startup_stm32f407xx.o
 
 # ------------------------------------------------------------------------------
 # Files and directories for the system firmware
@@ -359,8 +371,7 @@ DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_CMSISDSP:.o=.d) \
 				$(OBJS_CORE:.o=.d)
 
-all: | $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR)
-all: $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize
+all: $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize
 
 # ------------------------------------------------------------------------------
 # Main rules
@@ -377,8 +388,7 @@ $(FW_BUILD_DIR):
 	@echo "Creating directory: $@"
 	@mkdir -p $(FW_BUILD_DIR)
 
-$(DEP_FILE): | $(BUILD_DIR)
-$(DEP_FILE): $(DEPS)
+$(DEP_FILE): $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR) $(DEPS)
 	@echo "Creating file: $@"
 	@cat $(DEPS) > $(DEP_FILE)
 
@@ -569,13 +579,21 @@ debug_server: $(TARGET_BIN)
 	$(OPENOCD_PATH)openocd \
 	-f board/stm32f4discovery.cfg \
 	-c "init" \
-	-c "reset" \
-	-c "halt"
+	-c "reset halt" \
+	$(OPENOCDSEMIHOSTCMD) \
+	-c "poll"
 
 debug_client:
-	$(DB) --tui --eval-command="target remote localhost:3333" $(TARGET_ELF)
+	$(DB) --tui --eval-command="target remote localhost:3333" \
+							--eval-command="b main" \
+							$(TARGET_ELF)
 
 ddd_client:
-	$(DDD) --eval-command="target remote localhost:3333" --debugger $(DB) $(TARGET_ELF)
+	$(DDD) --eval-command="target remote localhost:3333" --eval-command="b main" --debugger $(DB) $(TARGET_ELF)
 
-.PHONY: debug_client debug_server ddd_client
+debug_gdb:
+	@gnome-terminal -e "make -f $(TARGET)/Makefile debug_server" 
+	sleep 8s
+	@gnome-terminal -e "make -f $(TARGET)/Makefile debug_client" 
+
+.PHONY: debug_client debug_server ddd_client debug_gdb
