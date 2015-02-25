@@ -27,7 +27,6 @@
 # ------------------------------------------------------------------------------
 TOOLCHAIN_PATH 				?= $(HOME)/opt/bin/gcc-arm-none-eabi/
 TOOLCHAIN_BIN 				= $(TOOLCHAIN_PATH)bin/
-STM32_PATH 						= libstm32f4/third_party/STM32CubeF4/
 
 #+ PGM_SERIAL_PORT 			= /dev/tty.usbserial-A100S09O
 #+ PGM_SERIAL_BAUD_RATE 	= 115200
@@ -50,6 +49,7 @@ SIZE						 			= $(TOOLCHAIN_BIN)arm-none-eabi-size
 NM 										= $(TOOLCHAIN_BIN)arm-none-eabi-nm
 HEXDUMP								= hexdump
 DDD										= ddd
+CTAGS									= ctags
 
 REMOVE 								= rm -f
 CAT 									= cat
@@ -60,6 +60,8 @@ FORMAT_RAMSIZE 				= | xargs -I {} echo -ne "Ram:\n {} bytes" | figlet | cowsay 
 OPENOCD_PATH					= $(HOME)/opt/bin/
 STM32LOADER_PATH 			= libstm32f4/programming/serial/
 OPENOCD_SCRIPTS_PATH 	= libstm32f4/programming/jtag/
+
+TAGS									= tags
 
 # ------------------------------------------------------------------------------
 # Platform specific flags
@@ -231,9 +233,12 @@ LDLIBS					+= -lPDMFilter_CM4F_GCC
 # Files and directories for the user code
 # ------------------------------------------------------------------------------
 VPATH 								= $(PACKAGES)
-CC_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.cc,$(PACKAGES))))
-C_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.c,$(PACKAGES))))
-AS_FILES 							= $(notdir $(wildcard $(patsubst %,%/*.S,$(PACKAGES))))
+CC_FILES_FULL					= $(wildcard $(patsubst %,%/*.cc,$(PACKAGES)))
+CC_FILES 							= $(notdir $(CC_FILES_FULL))
+C_FILES_FULL 					= $(wildcard $(patsubst %,%/*.c,$(PACKAGES)))
+C_FILES 							= $(notdir $(C_FILES_FULL))
+AS_FILES_FULL					= $(wildcard $(patsubst %,%/*.S,$(PACKAGES)))
+AS_FILES 							= $(notdir $(AS_FILES_FULL))
 
 TARGET_BIN 						= $(BUILD_DIR)$(TARGET).bin
 TARGET_ELF 						= $(BUILD_DIR)$(TARGET).elf
@@ -250,6 +255,8 @@ DEP_FILE 							= $(BUILD_DIR)depends.mk
 # ------------------------------------------------------------------------------
 # Files and directories for the system firmware
 # ------------------------------------------------------------------------------
+STM32_PATH 						= libstm32f4/third_party/STM32CubeF4/
+
 FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver/
 FW_STDDRIVER_SRCDIR 			= $(FW_STDDRIVER_DIR)src
 FW_STDDRIVER_INCDIR 			= $(FW_STDDRIVER_DIR)inc
@@ -319,23 +326,28 @@ VPATH 								+= $(FW_STARTUP_DIR) \
 													$(FW_CMSIS_DSP_SUPPORT_DIR) \
 													$(FW_CMSIS_DSP_TRANSFORM_DIR) 
 
-CORE_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_CMSIS_STM32F4_DIR))))
-CORE_S_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.S,$(FW_CMSIS_STM32F4_DIR))))
-DRIVERS_C_FILES 			= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_STDDRIVER_SRCDIR))))
-DISCOVERY_C_FILES			= $(notdir $(wildcard $(patsubst %,%/*.c,	$(FW_DISCOVERY_DIR) \
-																																$(FW_COMMON_COMPONENTS_DIR) \
-																																$(FW_CS43L22_DIR) $(FW_LIS3DSH_DIR) \
-																																$(FW_LIS302DL_DIR))))
-CMSISDSP_C_FILES			= $(notdir $(wildcard $(patsubst %,%/*.c,	$(FW_CMSIS_DSP_BASIC_DIR) \
-																																$(FW_CMSIS_DSP_COMMON_DIR) \
-																																$(FW_CMSIS_DSP_COMPLEX_DIR) \
-																																$(FW_CMSIS_DSP_CONTROL_DIR) \
-																																$(FW_CMSIS_DSP_FAST_DIR) \
-																																$(FW_CMSIS_DSP_FILTER_DIR) \
-																																$(FW_CMSIS_DSP_MATRIX_DIR) \
-																																$(FW_CMSIS_DSP_STAT_DIR) \
-																																$(FW_CMSIS_DSP_SUPPORT_DIR) \
-																																$(FW_CMSIS_DSP_TRANSFORM_DIR))))
+CORE_C_FILES_FULL 		= $(wildcard $(patsubst %,%/*.c,$(FW_CMSIS_STM32F4_DIR)))
+CORE_C_FILES 					= $(notdir $(CORE_C_FILES_FULL))
+CORE_S_FILES_FULL			= $(wildcard $(patsubst %,%/*.S,$(FW_CMSIS_STM32F4_DIR)))
+CORE_S_FILES 					= $(notdir $(CORE_S_FILES_FULL))
+DRIVERS_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,$(FW_STDDRIVER_SRCDIR)))
+DRIVERS_C_FILES 			= $(notdir $(DRIVERS_C_FILES_FULL))
+DISCOVERY_C_FILES_FULL= $(wildcard $(patsubst %,%/*.c,	$(FW_DISCOVERY_DIR) \
+																												$(FW_COMMON_COMPONENTS_DIR) \
+																												$(FW_CS43L22_DIR) $(FW_LIS3DSH_DIR) \
+																												$(FW_LIS302DL_DIR)))
+DISCOVERY_C_FILES			= $(notdir $(DISCOVERY_C_FILES_FULL))
+CMSISDSP_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_CMSIS_DSP_BASIC_DIR) \
+																												$(FW_CMSIS_DSP_COMMON_DIR) \
+																												$(FW_CMSIS_DSP_COMPLEX_DIR) \
+																												$(FW_CMSIS_DSP_CONTROL_DIR) \
+																												$(FW_CMSIS_DSP_FAST_DIR) \
+																												$(FW_CMSIS_DSP_FILTER_DIR) \
+																												$(FW_CMSIS_DSP_MATRIX_DIR) \
+																												$(FW_CMSIS_DSP_STAT_DIR) \
+																												$(FW_CMSIS_DSP_SUPPORT_DIR) \
+																												$(FW_CMSIS_DSP_TRANSFORM_DIR)))
+CMSISDSP_C_FILES			= $(notdir $(CMSISDSP_C_FILES_FULL))
 
 #+ USB_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_USB_SRCDIR))))
 
@@ -371,7 +383,7 @@ DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_CMSISDSP:.o=.d) \
 				$(OBJS_CORE:.o=.d)
 
-all: $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize
+all: $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
 
 # ------------------------------------------------------------------------------
 # Main rules
@@ -398,8 +410,12 @@ $(BUILD_DIR)%.elf: $(OBJS)
 
 $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
+.PHONY: ctags
+ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL)
+	@ctags --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL)
+
 clean:
-	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS)
+	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS) $(TAGS)
  
 size: $(TARGET_SIZE)
 	@cat $(TARGET_SIZE) | awk '{ print $$1+$$2 }' | tail -n1 $(FORMAT_SIZE)
