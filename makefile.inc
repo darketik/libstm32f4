@@ -34,6 +34,7 @@ TOOLCHAIN_BIN 				= $(TOOLCHAIN_PATH)bin/
 
 BUILD_ROOT 						= build/
 BUILD_DIR 						= $(BUILD_ROOT)$(TARGET)/
+BUILD_OBJ 						= $(BUILD_ROOT)$(TARGET)/obj/
 
 LIBDIR								= $(BUILD_ROOT)lib/
 
@@ -53,6 +54,7 @@ CTAGS									= ctags
 
 REMOVE 								= rm -f
 CAT 									= cat
+DOXYGEN								= doxygen
 
 FORMAT_SIZE    				= | xargs -I {} echo -ne "Flash:\n {} bytes" | figlet | cowsay -e o~ -n -f moose
 FORMAT_RAMSIZE 				= | xargs -I {} echo -ne "Ram:\n {} bytes" | figlet | cowsay -e ~o -n -f koala
@@ -293,8 +295,6 @@ FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
 #+ FW_USB_SRCDIR 				= $(FW_USB_DIR)src
 #+ FW_USB_INCDIR 				= $(FW_USB_DIR)inc
 
-FW_BUILD_DIR 					= $(BUILD_ROOT)stm_firmware/
-
 INCFLAGS 							+= -I$(STM32_PATH) \
 												 -I$(FW_STDDRIVER_INCDIR) \
 												 -I$(FW_CMSIS_STM32F4_DIR) \
@@ -363,19 +363,19 @@ CMSISDSP_C_FILES			= $(notdir $(CMSISDSP_C_FILES_FULL))
 # What to build
 # ------------------------------------------------------------------------------
 OBJ_CMSISDSP_FILES = $(CMSISDSP_C_FILES:.c=.o)
-OBJS_CMSISDSP = $(patsubst %,$(BUILD_DIR)%,$(OBJ_CMSISDSP_FILES))
+OBJS_CMSISDSP = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_CMSISDSP_FILES))
 
 OBJ_CORE_FILES = $(CORE_C_FILES:.c=.o) $(CORE_S_FILES:.S=.o)
-OBJS_CORE = $(patsubst %,$(BUILD_DIR)%,$(OBJ_CORE_FILES))
+OBJS_CORE = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_CORE_FILES))
 
 OBJ_DISCOVERY_FILES = $(DISCOVERY_C_FILES:.c=.o)
-OBJS_DISCOVERY = $(patsubst %,$(BUILD_DIR)%,$(OBJ_DISCOVERY_FILES))
+OBJS_DISCOVERY = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DISCOVERY_FILES))
 
 OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o)
-OBJS_DRIVERS = $(patsubst %,$(BUILD_DIR)%,$(OBJ_DRIVERS_FILES))
+OBJS_DRIVERS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DRIVERS_FILES))
 
 OBJ_FILES = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.S=.o)
-OBJS = $(patsubst %,$(BUILD_DIR)%,$(OBJ_FILES))
+OBJS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_FILES))
 
 DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_DRIVERS:.o=.d) \
@@ -383,7 +383,7 @@ DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_CMSISDSP:.o=.d) \
 				$(OBJS_CORE:.o=.d)
 
-all: $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
+all: $(BUILD_DIR) $(BUILD_OBJ) $(LIBDIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
 
 # ------------------------------------------------------------------------------
 # Main rules
@@ -392,15 +392,15 @@ $(BUILD_DIR):
 	@echo "Creating directory: $@"
 	@mkdir -p $(BUILD_DIR)
 
+$(BUILD_OBJ):
+	@echo "Creating directory: $@"
+	@mkdir -p $(BUILD_OBJ)
+
 $(LIBDIR):
 	@echo "Creating directory: $@"
 	@mkdir -p $(LIBDIR)
 
-$(FW_BUILD_DIR):
-	@echo "Creating directory: $@"
-	@mkdir -p $(FW_BUILD_DIR)
-
-$(DEP_FILE): $(BUILD_DIR) $(LIBDIR) $(FW_BUILD_DIR) $(DEPS)
+$(DEP_FILE): $(BUILD_DIR) $(BUILD_OBJ) $(LIBDIR) $(DEPS)
 	@echo "Creating file: $@"
 	@cat $(DEPS) > $(DEP_FILE)
 
@@ -450,27 +450,27 @@ include $(DEP_FILE)
 # ------------------------------------------------------------------------------
 # Source compiling and dependency analysis
 # ------------------------------------------------------------------------------
-$(BUILD_DIR)%.o: %.S
+$(BUILD_OBJ)%.o: %.S
 	@echo "Compiling: $<"
 	@$(CC) -c -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
-$(BUILD_DIR)%.o: %.c
+$(BUILD_OBJ)%.o: %.c
 	@echo "Compiling: $<"
 	@$(CC) -c $(CFLAGS) $< -o $@
 
-$(BUILD_DIR)%.o: %.cc
+$(BUILD_OBJ)%.o: %.cc
 	@echo "Compiling: $<"
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
-$(BUILD_DIR)%.d: %.S
+$(BUILD_OBJ)%.d: %.S
 	@echo "Generating dependency: $@"
 	@$(CC) -c -x assembler-with-cpp -MM $(ASFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
-$(BUILD_DIR)%.d: %.c
+$(BUILD_OBJ)%.d: %.c
 	@echo "Generating dependency: $@"
 	@$(CC) -MM $(CFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
-$(BUILD_DIR)%.d: %.cc
+$(BUILD_OBJ)%.d: %.cc
 	@echo "Generating dependency: $@"
 	@$(CXX) -MM $(CFLAGS) $(CXXFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
