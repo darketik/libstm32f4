@@ -264,7 +264,6 @@ FW_STDDRIVER_SRCDIR 			= $(FW_STDDRIVER_DIR)src
 FW_STDDRIVER_INCDIR 			= $(FW_STDDRIVER_DIR)inc
 
 FW_CMSIS_DIR 							= $(STM32_PATH)CMSIS/
-FW_STARTUP_DIR 						= $(FW_CMSIS_DIR)Device
 FW_CMSIS_CORE_DIR					= $(FW_CMSIS_DIR)inc
 FW_CMSIS_STM32F4_DIR			= $(FW_CMSIS_DIR)Device
 FW_CMSIS_RTOS_DIR					= $(FW_CMSIS_DIR)RTOS
@@ -307,8 +306,7 @@ INCFLAGS 							+= -I$(STM32_PATH) \
 												 -I$(FW_LIS302DL_DIR) \
 												 -I$(FW_AUDIO_PDM_DIR)  
 
-VPATH 								+= $(FW_STARTUP_DIR) \
-												 $(FW_CMSIS_STM32F4_DIR) \
+VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 												 $(FW_STDDRIVER_SRCDIR) \
 												 $(FW_DISCOVERY_DIR) \
 												 $(FW_COMMON_COMPONENTS_DIR) \
@@ -326,6 +324,17 @@ VPATH 								+= $(FW_STARTUP_DIR) \
 													$(FW_CMSIS_DSP_SUPPORT_DIR) \
 													$(FW_CMSIS_DSP_TRANSFORM_DIR) 
 
+ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(STM32_PATH) \
+																											 $(FW_STDDRIVER_INCDIR) \
+																											 $(FW_CMSIS_STM32F4_DIR) \
+																											 $(FW_CMSIS_CORE_DIR) \
+																											 $(FW_CMSIS_RTOS_DIR) \
+																											 $(FW_DISCOVERY_DIR) \
+																											 $(FW_COMMON_COMPONENTS_DIR) \
+																											 $(FW_CS43L22_DIR) \
+																											 $(FW_LIS3DSH_DIR) \
+																											 $(FW_LIS302DL_DIR) \
+																											 $(FW_AUDIO_PDM_DIR)))
 CORE_C_FILES_FULL 		= $(wildcard $(patsubst %,%/*.c,$(FW_CMSIS_STM32F4_DIR)))
 CORE_C_FILES 					= $(notdir $(CORE_C_FILES_FULL))
 CORE_S_FILES_FULL			= $(wildcard $(patsubst %,%/*.S,$(FW_CMSIS_STM32F4_DIR)))
@@ -411,8 +420,8 @@ $(BUILD_DIR)%.elf: $(OBJS)
 $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
 .PHONY: ctags
-ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL)
-	@ctags --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL)
+ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)
+	@$(CTAGS) --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)
 
 clean:
 	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS) $(TAGS)
