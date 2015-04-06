@@ -262,6 +262,7 @@ STM32_PATH 						= libstm32f4/third_party/STM32CubeF4/
 FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver/
 FW_STDDRIVER_SRCDIR 			= $(FW_STDDRIVER_DIR)src
 FW_STDDRIVER_INCDIR 			= $(FW_STDDRIVER_DIR)inc
+FW_STDDRIVER_INCDIR_LEGACY= $(FW_STDDRIVER_INCDIR)/Legacy
 
 FW_CMSIS_DIR 							= $(STM32_PATH)CMSIS/
 FW_CMSIS_CORE_DIR					= $(FW_CMSIS_DIR)inc
@@ -296,6 +297,7 @@ FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
 
 INCFLAGS 							+= -I$(STM32_PATH) \
 												 -I$(FW_STDDRIVER_INCDIR) \
+												 -I$(FW_STDDRIVER_INCDIR_LEGACY) \
 												 -I$(FW_CMSIS_STM32F4_DIR) \
 												 -I$(FW_CMSIS_CORE_DIR) \
 												 -I$(FW_CMSIS_RTOS_DIR) \
@@ -324,8 +326,10 @@ VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 													$(FW_CMSIS_DSP_SUPPORT_DIR) \
 													$(FW_CMSIS_DSP_TRANSFORM_DIR) 
 
-ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(STM32_PATH) \
+ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
+																											 $(STM32_PATH) \
 																											 $(FW_STDDRIVER_INCDIR) \
+																											 $(FW_STDDRIVER_INCDIR_LEGACY) \
 																											 $(FW_CMSIS_STM32F4_DIR) \
 																											 $(FW_CMSIS_CORE_DIR) \
 																											 $(FW_CMSIS_RTOS_DIR) \
