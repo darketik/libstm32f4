@@ -2,15 +2,15 @@
   ******************************************************************************
   * @file    stm32f4xx_hal_conf_template.h
   * @author  MCD Application Team
-  * @version V1.2.0
-  * @date    26-December-2014
+  * @version V1.3.0
+  * @date    09-March-2015
   * @brief   HAL configuration template file. 
   *          This file should be copied to the application folder and renamed
   *          to stm32f4xx_hal_conf.h.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2014 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -56,18 +56,19 @@
 #define HAL_ADC_MODULE_ENABLED  
 #define HAL_CAN_MODULE_ENABLED  
 #define HAL_CRC_MODULE_ENABLED  
+#define HAL_CEC_MODULE_ENABLED
 #define HAL_CRYP_MODULE_ENABLED  
 #define HAL_DAC_MODULE_ENABLED  
 #define HAL_DCMI_MODULE_ENABLED 
 #define HAL_DMA_MODULE_ENABLED
-//+ #define HAL_DMA2D_MODULE_ENABLED 
+#define HAL_DMA2D_MODULE_ENABLED 
 #define HAL_ETH_MODULE_ENABLED 
 #define HAL_FLASH_MODULE_ENABLED 
 #define HAL_NAND_MODULE_ENABLED
 #define HAL_NOR_MODULE_ENABLED
 #define HAL_PCCARD_MODULE_ENABLED
 #define HAL_SRAM_MODULE_ENABLED
-//+ #define HAL_SDRAM_MODULE_ENABLED
+#define HAL_SDRAM_MODULE_ENABLED
 #define HAL_HASH_MODULE_ENABLED  
 #define HAL_GPIO_MODULE_ENABLED
 #define HAL_I2C_MODULE_ENABLED
@@ -75,10 +76,11 @@
 #define HAL_IWDG_MODULE_ENABLED 
 #define HAL_LTDC_MODULE_ENABLED 
 #define HAL_PWR_MODULE_ENABLED   
+#define HAL_QSPI_MODULE_ENABLED   
 #define HAL_RCC_MODULE_ENABLED 
 #define HAL_RNG_MODULE_ENABLED   
 #define HAL_RTC_MODULE_ENABLED
-//+ #define HAL_SAI_MODULE_ENABLED   
+#define HAL_SAI_MODULE_ENABLED   
 #define HAL_SD_MODULE_ENABLED  
 #define HAL_SPI_MODULE_ENABLED   
 #define HAL_TIM_MODULE_ENABLED   
@@ -90,6 +92,8 @@
 #define HAL_CORTEX_MODULE_ENABLED
 #define HAL_PCD_MODULE_ENABLED
 #define HAL_HCD_MODULE_ENABLED
+#define HAL_FMPI2C_MODULE_ENABLED
+#define HAL_SPDIFRX_MODULE_ENABLED
 
 
 /* ########################## HSE/HSI Values adaptation ##################### */
@@ -378,6 +382,22 @@
 #ifdef HAL_HCD_MODULE_ENABLED
  #include "stm32f4xx_hal_hcd.h"
 #endif /* HAL_HCD_MODULE_ENABLED */
+   
+#ifdef HAL_QSPI_MODULE_ENABLED
+ #include "stm32f4xx_hal_qspi.h"
+#endif /* HAL_QSPI_MODULE_ENABLED */
+
+#ifdef HAL_CEC_MODULE_ENABLED
+ #include "stm32f4xx_hal_cec.h"
+#endif /* HAL_CEC_MODULE_ENABLED */
+
+#ifdef HAL_FMPI2C_MODULE_ENABLED
+ #include "stm32f4xx_hal_fmpi2c.h"
+#endif /* HAL_FMPI2C_MODULE_ENABLED */
+
+#ifdef HAL_SPDIFRX_MODULE_ENABLED
+ #include "stm32f4xx_hal_spdifrx.h"
+#endif /* HAL_SPDIFRX_MODULE_ENABLED */
    
 /* Exported macro ------------------------------------------------------------*/
 #ifdef  USE_FULL_ASSERT
