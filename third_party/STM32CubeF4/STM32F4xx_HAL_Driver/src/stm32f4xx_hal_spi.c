@@ -2115,8 +2115,6 @@ static void SPI_DMAEndTransmitReceive(SPI_HandleTypeDef *hspi)
   */
 static void SPI_DMATransmitReceiveCplt(DMA_HandleTypeDef *hdma)   
 {
-  __IO uint16_t tmpreg;
-  
   SPI_HandleTypeDef* hspi = ( SPI_HandleTypeDef* )((DMA_HandleTypeDef* )hdma)->Parent;
   if((hdma->Instance->CR & DMA_SxCR_CIRC) == 0)
   { /**/
