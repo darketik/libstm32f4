@@ -154,9 +154,7 @@ INCFLAGS 							= -I.
 WARNINGS							= -Wall \
 												-Werror \
 												-Wpointer-arith \
-												-Wbad-function-cast \
 												-Waggregate-return \
-												-Wstrict-prototypes \
 												-Wno-unused-local-typedefs \
 												-Wunused
 
@@ -168,12 +166,15 @@ WARNINGS							= -Wall \
 												#-Wmissing-prototypes \
 												#-Wmissing-declarations \
 
-CFLAGS 							= 	$(WARNINGS) \
+CWARNINGS							= -Wbad-function-cast \
+												-Wstrict-prototypes 
+
+
+FLAGS								=		$(WARNINGS) \
 												$(DEFS) \
 												$(ARCHFLAGS) \
 												$(INCFLAGS) \
 												$(COPTFLAGS) \
-												-std=gnu99 \
 												-fasm \
 												-finline \
 												-finline-functions-called-once \
@@ -184,7 +185,11 @@ CFLAGS 							= 	$(WARNINGS) \
 												-fmessage-length=0 \
 												-fno-move-loop-invariants
 
-CXXFLAGS 							= $(CFLAGS) \
+CFLAGS 							= 	$(FLAGS) \
+												$(CWARNINGS) \
+												-std=gnu99 \
+
+CXXFLAGS 							= $(FLAGS) \
 												-fno-exceptions \
 												-fno-rtti \
 												-std=c++11
@@ -396,7 +401,11 @@ DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_CMSISDSP:.o=.d) \
 				$(OBJS_CORE:.o=.d)
 
-all: $(BUILD_DIR) $(BUILD_OBJ) $(LIBDIR) $(LIBS) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
+.PHONY: all clean libs
+
+all: $(BUILD_DIR) $(BUILD_OBJ) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
+
+libs: $(LIBDIR) $(LIBS) | $(BUILD_DIR) 
 
 # ------------------------------------------------------------------------------
 # Main rules
@@ -435,8 +444,6 @@ size: $(TARGET_SIZE)
 
 ramsize: $(TARGET_SIZE)
 	@cat $(TARGET_SIZE) | awk '{ print $$2+$$3 }' | tail -n1 $(FORMAT_RAMSIZE)
-
-.PHONY: all clean
 
 $(LIBSTDPERIPH): $(OBJS_DRIVERS)
 	@echo "Creating library: $@"
@@ -485,7 +492,7 @@ $(BUILD_OBJ)%.d: %.c
 
 $(BUILD_OBJ)%.d: %.cc
 	@echo "Generating dependency: $@"
-	@$(CXX) -MM $(CFLAGS) $(CXXFLAGS) $< -MF $@ -MT $(@:.d=.o)
+	@$(CXX) -MM $(CXXFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
 # ------------------------------------------------------------------------------
 # Object file conversion
