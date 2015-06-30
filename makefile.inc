@@ -262,6 +262,7 @@ DEP_FILE 							= $(BUILD_DIR)depends.mk
 # ------------------------------------------------------------------------------
 # Files and directories for the system firmware
 # ------------------------------------------------------------------------------
+LIBSTM32F4_PATH 			= libstm32f4
 STM32_PATH 						= libstm32f4/third_party/STM32CubeF4/
 
 FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver/
@@ -300,7 +301,8 @@ FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
 #+ FW_USB_SRCDIR 				= $(FW_USB_DIR)src
 #+ FW_USB_INCDIR 				= $(FW_USB_DIR)inc
 
-INCFLAGS 							+= -I$(STM32_PATH) \
+INCFLAGS 							+= -I$(LIBSTM32F4_PATH) \
+												 -I$(STM32_PATH) \
 												 -I$(FW_STDDRIVER_INCDIR) \
 												 -I$(FW_STDDRIVER_INCDIR_LEGACY) \
 												 -I$(FW_CMSIS_STM32F4_DIR) \
@@ -332,6 +334,7 @@ VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 													$(FW_CMSIS_DSP_TRANSFORM_DIR) 
 
 ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
+																											 $(LIBSTM32F4_PATH) \
 																											 $(STM32_PATH) \
 																											 $(FW_STDDRIVER_INCDIR) \
 																											 $(FW_STDDRIVER_INCDIR_LEGACY) \
