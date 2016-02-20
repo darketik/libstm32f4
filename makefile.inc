@@ -83,7 +83,7 @@ DEFS								= -D$(MODEL_DEFINE) \
 											$(APPLICATION_DEFINE) \
 											$(COPTDEFS) \
 											$(CSEMIHOSTDEFS) \
-											-DUSE_STDPERIPH_DRIVER \
+											-DUSE_HAL_DRIVER \
 											-DUSE_STM32F4_DISCOVERY \
 											-D__VFP_FP__ \
 											-D__FPU_PRESENT=1 \
@@ -96,6 +96,7 @@ DEFS								= -D$(MODEL_DEFINE) \
 											#+ -DF_CRYSTAL=$(F_CRYSTAL) \
 											#+ -D$(SYSCLOCK)=$(F_CPU) \
 											#$(PROJECT_CONFIGURATION) \
+											-DUSE_STDPERIPH_DRIVER \
 
 								#+ -DUSE_OTG_MODE \
 								#+ -DUSE_HOST_MODE \
@@ -430,7 +431,7 @@ $(DEP_FILE): $(BUILD_DIR) $(BUILD_OBJ) $(LIBDIR) $(DEPS)
 	@cat $(DEPS) > $(DEP_FILE)
 
 $(BUILD_DIR)%.elf: $(OBJS)
-	@echo "Linking: $@"
+	@echo "[LD] $@"
 	@$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
@@ -449,22 +450,22 @@ ramsize: $(TARGET_SIZE)
 	@cat $(TARGET_SIZE) | awk '{ print $$2+$$3 }' | tail -n1 $(FORMAT_RAMSIZE)
 
 $(LIBSTDPERIPH): $(OBJS_DRIVERS)
-	@echo "Creating library: $@"
+	@echo "[AR] $@"
 	@$(AR) -cru $@ $^
 	@$(RANLIB) $@
 
 $(LIBDISCOVERY): $(OBJS_DISCOVERY)
-	@echo "Creating library: $@"
+	@echo "[AR] $@"
 	@$(AR) -cru $@ $^
 	@$(RANLIB) $@
 
 $(LIBCMSISSTM32F4): $(OBJS_CORE)
-	@echo "Creating library: $@"
+	@echo "[AR] $@"
 	@$(AR) -cru $@ $^
 	@$(RANLIB) $@
 
 $(LIBCMSISDSP): $(OBJS_CMSISDSP)
-	@echo "Creating library: $@"
+	@echo "[AR] $@"
 	@$(AR) -cru $@ $^
 	@$(RANLIB) $@
 
@@ -474,62 +475,62 @@ include $(DEP_FILE)
 # Source compiling and dependency analysis
 # ------------------------------------------------------------------------------
 $(BUILD_OBJ)%.o: %.S
-	@echo "Compiling: $<"
+	@echo "[ASM] $<"
 	@$(CC) -c -x assembler-with-cpp $(ASFLAGS) $< -o $@
 
 $(BUILD_OBJ)%.o: %.c
-	@echo "Compiling: $<"
+	@echo "[CC] $<"
 	@$(CC) -c $(CFLAGS) $< -o $@
 
 $(BUILD_OBJ)%.o: %.cc
-	@echo "Compiling: $<"
+	@echo "[CXX] $<"
 	@$(CXX) -c $(CXXFLAGS) $< -o $@
 
 $(BUILD_OBJ)%.d: %.S
-	@echo "Generating dependency: $@"
+	@echo "[ASM] $@"
 	@$(CC) -c -x assembler-with-cpp -MM $(ASFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
 $(BUILD_OBJ)%.d: %.c
-	@echo "Generating dependency: $@"
+	@echo "[CC] $@"
 	@$(CC) -MM $(CFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
 $(BUILD_OBJ)%.d: %.cc
-	@echo "Generating dependency: $@"
+	@echo "[CXX] $@"
 	@$(CXX) -MM $(CXXFLAGS) $< -MF $@ -MT $(@:.d=.o)
 
 # ------------------------------------------------------------------------------
 # Object file conversion
 # ------------------------------------------------------------------------------
 $(BUILD_DIR)%.ihex: $(BUILD_DIR)%.elf
-	@echo "Generating: $@"
+	@echo "[OBJCOPY] $@"
 	@$(OBJCOPY) -O ihex $< $@
 
 $(BUILD_DIR)%.hex: $(BUILD_DIR)%.elf
-	@echo "Generating: $@"
+	@echo "[HEXDUMP] $@"
 	@$(HEXDUMP) -e '1/2 "%04x" "\n"' $< -v > $@
 
 $(BUILD_DIR)%.bin: $(BUILD_DIR)%.elf
-	@echo "Generating: $@"
+	@echo "[OBJCOPY] $@"
 	@$(OBJCOPY) -O binary $< $@
 
 $(BUILD_DIR)%.lss: $(BUILD_DIR)%.elf
-	@echo "Generating: $@"
+	@echo "[OBJDUMP] $@"
 	@$(OBJDUMP) -d -h -S $< > $@
 
 $(BUILD_DIR)%.sym: $(BUILD_DIR)%.elf
-	@echo "Generating: $@"
+	@echo "[NM] $@"
 	@$(NM) -n $< > $@
 
 $(BUILD_DIR)%.dis: $(BUILD_DIR)%.elf
-	@echo "Generating: $@"
+	@echo "[OBJDUMP] $@"
 	@$(OBJDUMP) -h -d $^ > $@
 
 $(BUILD_DIR)$(TARGET).top_symbols: $(TARGET_ELF)
-	@echo "Generating: $@"
+	@echo "[NM] $@"
 	@$(NM) $< --size-sort -C -f bsd -r > $@
 
 $(TARGET_SIZE): $(TARGET_ELF)
-	@echo "Generating: $@"
+	@echo "[SIZE] $@"
 	@$(SIZE) $(TARGET_ELF) > $(TARGET_SIZE)
 
 # ------------------------------------------------------------------------------
