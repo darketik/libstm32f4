@@ -27,9 +27,9 @@
 // API Driver for lcd 16x4 display.
 //
 
-#include "lcd16x2_api.h"
+#include "lcd16x2.h"
 
-namespace lcd16x2_api {
+namespace lcd16x2 {
 
 #define HD44780_CLEAR                          0x01
 
@@ -79,7 +79,7 @@ static const uint8_t CustomChar [] =
 };
 
 
-void Lcd::Init (void) {
+void Lcd::init (void) {
 	/* Init GPIO pins used for LCD interface */
 	/* TODO find a way to make it generic to any GPIO bank */
 	__HAL_RCC_GPIOE_CLK_ENABLE();

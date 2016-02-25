@@ -38,7 +38,7 @@
 #include "libstm32f4.h"
 #include "system.h"
 
-namespace led_rgb {
+namespace led_rgb_pwm {
 
 // FIXME: remove this defines by a case depending on tiumer and gpio
 #define TIMx_CLK_ENABLE __HAL_RCC_TIM3_CLK_ENABLE
@@ -50,9 +50,9 @@ namespace led_rgb {
 #define GREEN 1
 #define BLUE 2
 
-class LedRgb {
+class LedRgbPwm {
 	public:
-		LedRgb (GPIO_TypeDef * GPIOx,
+		LedRgbPwm (GPIO_TypeDef * GPIOx,
 						uint16_t red_gpio,
 						uint16_t green_gpio,
 						uint16_t blue_gpio,
@@ -75,8 +75,8 @@ class LedRgb {
 				this->green_pwm_duty_cycle = green_dc;
 				this->blue_pwm_duty_cycle = blue_dc;
 		}
-		//+ LedRgb () { }
-		~LedRgb () { }
+		//+ LedRgbPwm () { }
+		~LedRgbPwm () { }
 
 		void init (void);
 		void setColorDutyCycle (uint32_t color, uint8_t val);
@@ -100,7 +100,7 @@ class LedRgb {
 		TIM_HandleTypeDef TIMx_Handle;
 		TIM_OC_InitTypeDef TIMx_OC_InitStruct;
 
-		DISALLOW_COPY_AND_ASSIGN (LedRgb);
+		DISALLOW_COPY_AND_ASSIGN (LedRgbPwm);
 };
 
 } // namespace led_rgb 

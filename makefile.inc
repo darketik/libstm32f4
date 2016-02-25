@@ -466,7 +466,7 @@ clean_libs:
 	$(REMOVE) $(LIBS)
  
 clean_all:
-	$(MAKE) clean clean_libs
+	$(MAKE) -f $(TARGET)/Makefile clean clean_libs
  
 clean:
 	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS) $(TAGS)

@@ -33,7 +33,7 @@
 #include "stm32f4xx_hal.h"
 #include "libstm32f4.h"
 
-namespace lcd16x2_api {
+namespace lcd16x2 {
 
 class Lcd {
 	public:
@@ -49,7 +49,7 @@ class Lcd {
 			}
 		~Lcd () {}
 
-		void Init (void);
+		void init (void);
 		void Clear (void);
 		void Print (const char * str);
 		void PrintXY (const char * str, uint8_t x, uint8_t y);

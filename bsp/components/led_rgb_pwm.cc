@@ -29,9 +29,9 @@
 
 #include "led_rgb_pwm.h"
 
-namespace led_rgb {
+namespace led_rgb_pwm {
 
-void LedRgb::init (void) {
+void LedRgbPwm::init (void) {
 	uint32_t uPrescaler = 0;
 
 	// PWM config 
@@ -111,7 +111,7 @@ void LedRgb::init (void) {
 }
 
 // TODO: change duty cycle at a precise end of PWM period
-void LedRgb::setColorDutyCycle (uint32_t color, uint8_t val) {
+void LedRgbPwm::setColorDutyCycle (uint32_t color, uint8_t val) {
 	switch (color) 
 	{
 		case (RED):
@@ -137,7 +137,7 @@ void LedRgb::setColorDutyCycle (uint32_t color, uint8_t val) {
 	}
 }
 
-void LedRgb::on (uint32_t color) {
+void LedRgbPwm::on (uint32_t color) {
 	switch (color) 
 	{
 		case (RED):
@@ -172,7 +172,7 @@ void LedRgb::on (uint32_t color) {
 	}
 }
 
-void LedRgb::off (uint32_t color) {
+void LedRgbPwm::off (uint32_t color) {
 	switch (color) 
 	{
 		case (RED):
