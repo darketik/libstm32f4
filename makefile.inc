@@ -51,6 +51,7 @@ NM 										= $(TOOLCHAIN_BIN)arm-none-eabi-nm
 HEXDUMP								= hexdump
 DDD										= ddd
 CTAGS									= ctags
+MAKE									= make
 
 REMOVE 								= rm -f
 CAT 									= cat
@@ -235,6 +236,11 @@ LIBCMSISDSP 		:= $(LIBDIR)libcmsisdsp.a
 LIBS						+= $(LIBCMSISDSP)
 LDLIBS					+= -lcmsisdsp
 
+# bsp components lib
+# LIBCOMPONENT 		:= $(LIBDIR)libcomponent.a
+# LIBS						+= $(LIBCOMPONENT)
+# LDLIBS					+= -lcomponent
+
 LDLIBS					+= -lPDMFilter_CM4F_GCC
 
 # ------------------------------------------------------------------------------
@@ -263,7 +269,7 @@ DEP_FILE 							= $(BUILD_DIR)depends.mk
 # ------------------------------------------------------------------------------
 # Files and directories for the system firmware
 # ------------------------------------------------------------------------------
-LIBSTM32F4_PATH 			= libstm32f4
+LIBSTM32F4_PATH 			= libstm32f4/
 STM32_PATH 						= libstm32f4/third_party/STM32CubeF4/
 
 FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver/
@@ -288,17 +294,19 @@ FW_CMSIS_DSP_STAT_DIR			= $(FW_CMSIS_DSP_DIR)StatisticsFunctions
 FW_CMSIS_DSP_SUPPORT_DIR	= $(FW_CMSIS_DSP_DIR)SupportFunctions
 FW_CMSIS_DSP_TRANSFORM_DIR= $(FW_CMSIS_DSP_DIR)TransformFunctions
 
-FW_COMPONENTS_DIR					= $(STM32_PATH)BSP/Components/
-FW_CS43L22_DIR						= $(FW_COMPONENTS_DIR)cs43l22
-FW_LIS3DSH_DIR						= $(FW_COMPONENTS_DIR)lis3dsh
-FW_LIS302DL_DIR						= $(FW_COMPONENTS_DIR)lis302dl
-FW_COMMON_COMPONENTS_DIR	= $(FW_COMPONENTS_DIR)Common
-FW_DISCOVERY_DIR					= $(STM32_PATH)BSP/STM32F4-Discovery
+FW_DISCOVERY_COMPONENTS_DIR					= $(STM32_PATH)BSP/Components/
+FW_CS43L22_DIR											= $(FW_DISCOVERY_COMPONENTS_DIR)cs43l22
+FW_LIS3DSH_DIR											= $(FW_DISCOVERY_COMPONENTS_DIR)lis3dsh
+FW_LIS302DL_DIR											= $(FW_DISCOVERY_COMPONENTS_DIR)lis302dl
+FW_COMMON_COMPONENTS_DIR						= $(FW_DISCOVERY_COMPONENTS_DIR)Common
+FW_DISCOVERY_DIR										= $(STM32_PATH)BSP/STM32F4-Discovery
 
 FW_MIDDLEWARE_DIR					= $(STM32_PATH)MiddleWares/
 FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
 
-#+ FW_USB_DIR 						= $(STM32_PATH)/STM32_USB-FS-Device_Driver/
+FW_COMPONENT_DIR				  = $(LIBSTM32F4_PATH)bsp/components
+
+#+ FW_USB_DIR 						= $(STM32_PATH)STM32_USB-FS-Device_Driver/
 #+ FW_USB_SRCDIR 				= $(FW_USB_DIR)src
 #+ FW_USB_INCDIR 				= $(FW_USB_DIR)inc
 
@@ -314,7 +322,8 @@ INCFLAGS 							+= -I$(LIBSTM32F4_PATH) \
 												 -I$(FW_CS43L22_DIR) \
 												 -I$(FW_LIS3DSH_DIR) \
 												 -I$(FW_LIS302DL_DIR) \
-												 -I$(FW_AUDIO_PDM_DIR)  
+												 -I$(FW_AUDIO_PDM_DIR) \
+												 -I$(FW_COMPONENT_DIR)
 
 VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 												 $(FW_STDDRIVER_SRCDIR) \
@@ -332,7 +341,8 @@ VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 													$(FW_CMSIS_DSP_MATRIX_DIR) \
 													$(FW_CMSIS_DSP_STAT_DIR) \
 													$(FW_CMSIS_DSP_SUPPORT_DIR) \
-													$(FW_CMSIS_DSP_TRANSFORM_DIR) 
+													$(FW_CMSIS_DSP_TRANSFORM_DIR) \
+													$(FW_COMPONENT_DIR)
 
 ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
 																											 $(LIBSTM32F4_PATH) \
@@ -347,7 +357,9 @@ ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
 																											 $(FW_CS43L22_DIR) \
 																											 $(FW_LIS3DSH_DIR) \
 																											 $(FW_LIS302DL_DIR) \
-																											 $(FW_AUDIO_PDM_DIR)))
+																											 $(FW_AUDIO_PDM_DIR) \
+																											 $(FW_COMPONENT_DIR)))
+
 CORE_C_FILES_FULL 		= $(wildcard $(patsubst %,%/*.c,$(FW_CMSIS_STM32F4_DIR)))
 CORE_C_FILES 					= $(notdir $(CORE_C_FILES_FULL))
 CORE_S_FILES_FULL			= $(wildcard $(patsubst %,%/*.S,$(FW_CMSIS_STM32F4_DIR)))
@@ -371,6 +383,11 @@ CMSISDSP_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_CMSIS_DSP_BASIC_DIR)
 																												$(FW_CMSIS_DSP_TRANSFORM_DIR)))
 CMSISDSP_C_FILES			= $(notdir $(CMSISDSP_C_FILES_FULL))
 
+COMPONENT_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_COMPONENT_DIR)))
+COMPONENT_C_FILES				= $(notdir $(COMPONENT_C_FILES_FULL))
+COMPONENT_CC_FILES_FULL = $(wildcard $(patsubst %,%/*.cc,	$(FW_COMPONENT_DIR)))
+COMPONENT_CC_FILES			= $(notdir $(COMPONENT_CC_FILES_FULL))
+
 #+ USB_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_USB_SRCDIR))))
 
 #C_FILES 							+= 	
@@ -393,8 +410,11 @@ OBJS_CORE = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_CORE_FILES))
 OBJ_DISCOVERY_FILES = $(DISCOVERY_C_FILES:.c=.o)
 OBJS_DISCOVERY = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DISCOVERY_FILES))
 
-OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o)
+OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o) $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o)
 OBJS_DRIVERS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DRIVERS_FILES))
+
+# OBJ_COMPONENT_FILES = $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o)
+# OBJS_COMPONENT = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_COMPONENT_FILES))
 
 OBJ_FILES = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.S=.o)
 OBJS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_FILES))
@@ -403,9 +423,11 @@ DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_DRIVERS:.o=.d) \
 				$(OBJS_DISCOVERY:.o=.d) \
 				$(OBJS_CMSISDSP:.o=.d) \
-				$(OBJS_CORE:.o=.d)
+				$(OBJS_CORE:.o=.d) \
+				$(OBJS_COMPONENT:.o=.d) 
 
-.PHONY: all clean libs
+
+.PHONY: all clean clean_libs clean_all libs
 
 all: $(BUILD_DIR) $(BUILD_OBJ) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
 
@@ -437,9 +459,15 @@ $(BUILD_DIR)%.elf: $(OBJS)
 $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
 .PHONY: ctags
-ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)
-	@$(CTAGS) --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)
+ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(COMPONENT_C_FILES_FULL)
+	@$(CTAGS) --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(COMPONENT_C_FILES_FULL)
 
+clean_libs:
+	$(REMOVE) $(LIBS)
+ 
+clean_all:
+	$(MAKE) clean clean_libs
+ 
 clean:
 	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS) $(TAGS)
  
@@ -468,6 +496,11 @@ $(LIBCMSISDSP): $(OBJS_CMSISDSP)
 	@echo "[AR] $@"
 	@$(AR) -cru $@ $^
 	@$(RANLIB) $@
+
+# $(LIBCOMPONENT): $(OBJS_COMPONENT)
+# 	@echo "[AR] $@"
+# 	@$(AR) -cru $@ $^
+# 	@$(RANLIB) $@
 
 include $(DEP_FILE)
 
