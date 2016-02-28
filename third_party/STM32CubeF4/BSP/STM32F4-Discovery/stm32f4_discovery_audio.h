@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    stm32f4_discovery_audio.h
   * @author  MCD Application Team
-  * @version V2.0.4
-  * @date    02-March-2015
+  * @version V2.1.1
+  * @date    12-January-2016
   * @brief   This file contains the common defines and functions prototypes for
   *          stm32f4_discovery_audio.c driver.
   ******************************************************************************
   * @attention
   *
-  * <h2><center>&copy; COPYRIGHT(c) 2015 STMicroelectronics</center></h2>
+  * <h2><center>&copy; COPYRIGHT(c) 2016 STMicroelectronics</center></h2>
   *
   * Redistribution and use in source and binary forms, with or without modification,
   * are permitted provided that the following conditions are met:
@@ -49,7 +49,7 @@
 #include "../Components/cs43l22/cs43l22.h"
 
 #include "stm32f4_discovery.h"
-#include "pdm_filter.h"
+#include "../../../Middlewares/ST/STM32_Audio/Addons/PDM/pdm_filter.h"
 
 /** @addtogroup BSP
   * @{
@@ -59,19 +59,19 @@
   * @{
   */
     
-/** @defgroup STM32F4_DISCOVERY_AUDIO
+/** @addtogroup STM32F4_DISCOVERY_AUDIO
   * @{
   */    
 
 
-/** @defgroup STM32F4_DISCOVERY_AUDIO_Exported_Types
+/** @defgroup STM32F4_DISCOVERY_AUDIO_Exported_Types STM32F4 DISCOVERY AUDIO Exported Types
   * @{
   */
 /**
   * @}
   */ 
 
-/** @defgroup STM32F4_DISCOVERY_AUDIO_OUT_Exported_Constants
+/** @defgroup STM32F4_DISCOVERY_AUDIO_OUT_Exported_Constants STM32F4 DISCOVERY AUDIO OUT Exported Constants
   * @{
   */ 
 
@@ -168,7 +168,7 @@
   * @}
   */ 
 
-/** @defgroup STM32F4_DISCOVERY_AUDIO_Exported_Variables 
+/** @defgroup STM32F4_DISCOVERY_AUDIO_Exported_Variables STM32F4 DISCOVERY AUDIO Exported Variables
   * @{
   */ 
 extern __IO uint16_t AudioInVolume;
@@ -176,7 +176,7 @@ extern __IO uint16_t AudioInVolume;
   * @}
   */ 
 
-/** @defgroup STM32F4_DISCOVERY_AUDIO_Exported_Macros AUDIO_Exported_Macros
+/** @defgroup STM32F4_DISCOVERY_AUDIO_Exported_Macros STM32F4 DISCOVERY AUDIO Exported Macros
   * @{
   */
 #define DMA_MAX(_X_)                (((_X_) <= DMA_MAX_SZE)? (_X_):DMA_MAX_SZE)
@@ -184,7 +184,7 @@ extern __IO uint16_t AudioInVolume;
   * @}
   */
 
-/** @defgroup STM32F4_DISCOVERY_AUDIO_OUT_Exported_Functions 
+/** @defgroup STM32F4_DISCOVERY_AUDIO_OUT_Exported_Functions  STM32F4 DISCOVERY AUDIO OUT Exported Functions
   * @{
   */ 
 uint8_t BSP_AUDIO_OUT_Init(uint16_t OutputDevice, uint8_t Volume, uint32_t AudioFreq);
@@ -212,7 +212,7 @@ void    BSP_AUDIO_OUT_Error_CallBack(void);
   * @}
   */
 
-/** @defgroup STM32F4_DISCOVERY_AUDIO_IN_Exported_Functions
+/** @defgroup STM32F4_DISCOVERY_AUDIO_IN_Exported_Functions STM32F4 DISCOVERY AUDIO IN Exported Functions
   * @{
   */ 
 uint8_t BSP_AUDIO_IN_Init(uint32_t AudioFreq, uint32_t BitRes, uint32_t ChnlNbr);
