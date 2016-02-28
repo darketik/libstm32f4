@@ -46,10 +46,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 /* Include audio component Driver */
-#include "../Components/cs43l22/cs43l22.h"
+#include "cs43l22.h"
 
 #include "stm32f4_discovery.h"
-#include "../../../Middlewares/ST/STM32_Audio/Addons/PDM/pdm_filter.h"
+#include "pdm_filter.h"
 
 /** @addtogroup BSP
   * @{

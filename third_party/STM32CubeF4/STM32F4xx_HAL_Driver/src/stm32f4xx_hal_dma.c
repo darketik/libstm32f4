@@ -147,7 +147,7 @@ typedef struct
   * @{
   */
 static void DMA_SetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t DstAddress, uint32_t DataLength);
-static uint32_t DMA_CalcBaseAndBitshift(DMA_HandleTypeDef *hdma);
+static DMA_Base_Registers * DMA_CalcBaseAndBitshift(DMA_HandleTypeDef *hdma);
 
 /**
   * @}
@@ -317,7 +317,7 @@ HAL_StatusTypeDef HAL_DMA_DeInit(DMA_HandleTypeDef *hdma)
   hdma->Instance->FCR  = (uint32_t)0x00000021U;
   
   /* Get DMA steam Base Address */  
-  regs = (DMA_Base_Registers *)DMA_CalcBaseAndBitshift(hdma);
+  regs = DMA_CalcBaseAndBitshift(hdma);
   
   /* Clear all interrupt flags at correct offset within the register */
   regs->IFCR = 0x3FU << hdma->StreamIndex;
@@ -919,7 +919,7 @@ static void DMA_SetConfig(DMA_HandleTypeDef *hdma, uint32_t SrcAddress, uint32_t
   *                     the configuration information for the specified DMA Stream. 
   * @retval Stream base address
   */
-static uint32_t DMA_CalcBaseAndBitshift(DMA_HandleTypeDef *hdma)
+static DMA_Base_Registers * DMA_CalcBaseAndBitshift(DMA_HandleTypeDef *hdma)
 {
   uint32_t stream_number = (((uint32_t)hdma->Instance & 0xFFU) - 16U) / 24U;
   
@@ -938,7 +938,7 @@ static uint32_t DMA_CalcBaseAndBitshift(DMA_HandleTypeDef *hdma)
     hdma->StreamBaseAddress = ((uint32_t)hdma->Instance & (uint32_t)(~0x3FFU));
   }
   
-  return hdma->StreamBaseAddress;
+  return (DMA_Base_Registers *)hdma->StreamBaseAddress;
 }
 /**
   * @}

@@ -87,7 +87,7 @@ DEFS								= -D$(MODEL_DEFINE) \
 											-DUSE_HAL_DRIVER \
 											-DUSE_STM32F4_DISCOVERY \
 											-D__VFP_FP__ \
-											-D__FPU_PRESENT=1 \
+											-D__FPU_PRESENT=1U \
 											-DARM_MATH_CM4 \
 											-DGCC_ARMCM4 \
 											-DHSE_VALUE=$(F_CRYSTAL) \
