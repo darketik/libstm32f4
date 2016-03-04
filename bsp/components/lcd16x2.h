@@ -35,6 +35,8 @@
 
 namespace lcd16x2 {
 
+#define LCD_CLK_ENABLE 				__HAL_RCC_GPIOE_CLK_ENABLE
+
 class Lcd {
 	public:
 		Lcd (GPIO_TypeDef *GpioBank, uint16_t RsPin, uint16_t RwPin, uint16_t EnPin, uint16_t Db4Pin, uint16_t Db5Pin, uint16_t Db6Pin, uint16_t Db7Pin) {

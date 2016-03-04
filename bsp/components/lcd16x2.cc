@@ -82,7 +82,7 @@ static const uint8_t CustomChar [] =
 void Lcd::init (void) {
 	/* Init GPIO pins used for LCD interface */
 	/* TODO find a way to make it generic to any GPIO bank */
-	__HAL_RCC_GPIOE_CLK_ENABLE();
+	LCD_CLK_ENABLE();
 
 	GPIO_InitStruct.Pin = RsPin | RwPin | EnPin | Db4Pin \
 											| Db5Pin | Db6Pin | Db7Pin;
