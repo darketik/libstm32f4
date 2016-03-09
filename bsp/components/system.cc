@@ -29,7 +29,7 @@
 
 #include "system.h"
 
-namespace system {
+namespace system_stm32f4 {
 
 void System::init (void) {
   /* STM32F4xx HAL library initialization:
@@ -117,7 +117,7 @@ void System::SystemClock_Config (void)
 }
 
 
-} // namespace system
+} // namespace system_stm32f4
 
 #ifdef __cplusplus
  extern "C" {

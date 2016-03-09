@@ -24,42 +24,18 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for STM32F4 system.
-
-#ifndef SYSTEM_API_H_
-#define SYSTEM_API_H_
-
-#include "stm32f4xx_hal.h"
-#include "libstm32f4.h"
-#include "stm32f4_discovery.h"
-
-namespace system_stm32f4 {
-
-class System {
-	public:
-		System () {}
-		~System () {}
-
-		void init (void);
-
-	private:
-		void SystemClock_Config (void);
-
-		DISALLOW_COPY_AND_ASSIGN (System);
-};
-
-} // namespace system_stm32f4
 
 #ifdef __cplusplus
  extern "C" {
 #endif 
 
-void Error_Handler (void);
-void Error_Check (void);
+caddr_t __attribute__((weak))
+_sbrk (int incr)
+{
+	return (caddr_t) 0;
+}
 
 #ifdef __cplusplus
 }
 #endif
-
-#endif // SYSTEM_API_H_
 

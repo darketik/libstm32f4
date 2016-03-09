@@ -65,6 +65,7 @@ STM32LOADER_PATH 			= libstm32f4/programming/serial/
 OPENOCD_SCRIPTS_PATH 	= libstm32f4/programming/jtag/
 
 TAGS									= tags
+CCTAGS								= tags_cc
 
 # ------------------------------------------------------------------------------
 # Platform specific flags
@@ -150,6 +151,15 @@ CSEMIHOSTDEFS					= -DSEMIHOST
 OPENOCDSEMIHOSTCMD		= -c "arm semihosting enable"
 endif
 
+NEWLIB_NANO						?= enable
+ifeq ($(SEMIHOST), disable)
+LDNEWLIBNANOFLAGS				= 
+endif
+ifeq ($(SEMIHOST), enable)
+LDNEWLIBNANOFLAGS				= --specs=nano.specs
+endif
+#+ LDNEWLIBNANOFLAGS		= --specs=nosys.specs
+
 
 INCFLAGS 							= -I. 
 
@@ -205,7 +215,7 @@ LINKER_SCRIPT 				=	libstm32f4/linker_scripts/stm32f407vg_flash.ld
 
 LDFLAGS 							= $(CFLAGS) \
 												$(LDSEMIHOSTFLAGS) \
-												--specs=nano.specs \
+												$(LDNEWLIBNANOFLAGS) \
 												-Wl,--gc-sections \
 												-Wl,--relax \
 												-Wl,-Map=$(BUILD_DIR)$(TARGET).map \
@@ -310,6 +320,8 @@ FW_COMPONENT_DIR				  = $(LIBSTM32F4_PATH)bsp/components
 #+ FW_USB_SRCDIR 				= $(FW_USB_DIR)src
 #+ FW_USB_INCDIR 				= $(FW_USB_DIR)inc
 
+TOOLCHAIN_INCDIR			= $(TOOLCHAIN_PATH)arm-none-eabi/include
+
 INCFLAGS 							+= -I$(LIBSTM32F4_PATH) \
 												 -I$(STM32_PATH) \
 												 -I$(FW_STDDRIVER_INCDIR) \
@@ -344,8 +356,10 @@ VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 													$(FW_CMSIS_DSP_TRANSFORM_DIR) \
 													$(FW_COMPONENT_DIR)
 
-ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
-																											 $(LIBSTM32F4_PATH) \
+ALL_HPP_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
+																											 	 $(FW_COMPONENT_DIR)))
+
+ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(LIBSTM32F4_PATH) \
 																											 $(STM32_PATH) \
 																											 $(FW_STDDRIVER_INCDIR) \
 																											 $(FW_STDDRIVER_INCDIR_LEGACY) \
@@ -357,8 +371,9 @@ ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
 																											 $(FW_CS43L22_DIR) \
 																											 $(FW_LIS3DSH_DIR) \
 																											 $(FW_LIS302DL_DIR) \
-																											 $(FW_AUDIO_PDM_DIR) \
-																											 $(FW_COMPONENT_DIR)))
+																											 $(FW_AUDIO_PDM_DIR)))
+
+TOOLCHAIN_H_FILES_FULL = $(wildcard $(patsubst %,%/*.h, $(TOOLCHAIN_INCDIR)))
 
 CORE_C_FILES_FULL 		= $(wildcard $(patsubst %,%/*.c,$(FW_CMSIS_STM32F4_DIR)))
 CORE_C_FILES 					= $(notdir $(CORE_C_FILES_FULL))
@@ -459,18 +474,21 @@ $(BUILD_DIR)%.elf: $(OBJS)
 $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
 .PHONY: ctags
-ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(COMPONENT_C_FILES_FULL)
-	@$(CTAGS) --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(COMPONENT_C_FILES_FULL)
+ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)  $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
+	@$(CTAGS) --sort=yes --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) 
+	@$(CTAGS) -R --sort=yes --c-kinds=+cdefglmnpstuvx -f $(TAGS)  $(TOOLCHAIN_H_FILES_FULL) 
+
+# @$(CTAGS) -R --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -f $(TAGS) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(ALL_HPP_FILES_FULL)
 
 clean_libs:
 	$(REMOVE) $(LIBS)
  
+clean:
+	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(TAGS) $(CCTAGS)
+  
 clean_all:
 	$(MAKE) -f $(TARGET)/Makefile clean clean_libs
- 
-clean:
-	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(LIBS) $(TAGS)
- 
+
 size: $(TARGET_SIZE)
 	@cat $(TARGET_SIZE) | awk '{ print $$1+$$2 }' | tail -n1 $(FORMAT_SIZE)
 
