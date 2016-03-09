@@ -153,7 +153,7 @@ endif
 
 NEWLIB_NANO						?= enable
 ifeq ($(SEMIHOST), disable)
-LDNEWLIBNANOFLAGS				= 
+LDNEWLIBNANOFLAGS				= --specs=nosys.specs
 endif
 ifeq ($(SEMIHOST), enable)
 LDNEWLIBNANOFLAGS				= --specs=nano.specs
@@ -314,7 +314,8 @@ FW_DISCOVERY_DIR										= $(STM32_PATH)BSP/STM32F4-Discovery
 FW_MIDDLEWARE_DIR					= $(STM32_PATH)MiddleWares/
 FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
 
-FW_COMPONENT_DIR				  = $(LIBSTM32F4_PATH)bsp/components
+FW_COMPONENT_DIR				  	= $(LIBSTM32F4_PATH)bsp/components
+FW_GCC_DIR				  			= $(LIBSTM32F4_PATH)bsp/gcc
 
 #+ FW_USB_DIR 						= $(STM32_PATH)STM32_USB-FS-Device_Driver/
 #+ FW_USB_SRCDIR 				= $(FW_USB_DIR)src
@@ -335,6 +336,7 @@ INCFLAGS 							+= -I$(LIBSTM32F4_PATH) \
 												 -I$(FW_LIS3DSH_DIR) \
 												 -I$(FW_LIS302DL_DIR) \
 												 -I$(FW_AUDIO_PDM_DIR) \
+												 -I$(FW_GCC_DIR) \
 												 -I$(FW_COMPONENT_DIR)
 
 VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
@@ -354,13 +356,15 @@ VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 													$(FW_CMSIS_DSP_STAT_DIR) \
 													$(FW_CMSIS_DSP_SUPPORT_DIR) \
 													$(FW_CMSIS_DSP_TRANSFORM_DIR) \
+													$(FW_GCC_DIR) \
 													$(FW_COMPONENT_DIR)
 
 ALL_HPP_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
-																											 	 $(FW_COMPONENT_DIR)))
+																	  $(FW_COMPONENT_DIR)))
 
 ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(LIBSTM32F4_PATH) \
 																											 $(STM32_PATH) \
+																											 $(FW_GCC_DIR) \
 																											 $(FW_STDDRIVER_INCDIR) \
 																											 $(FW_STDDRIVER_INCDIR_LEGACY) \
 																											 $(FW_CMSIS_STM32F4_DIR) \
@@ -402,6 +406,10 @@ COMPONENT_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_COMPONENT_DIR)))
 COMPONENT_C_FILES				= $(notdir $(COMPONENT_C_FILES_FULL))
 COMPONENT_CC_FILES_FULL = $(wildcard $(patsubst %,%/*.cc,	$(FW_COMPONENT_DIR)))
 COMPONENT_CC_FILES			= $(notdir $(COMPONENT_CC_FILES_FULL))
+GCC_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_GCC_DIR)))
+GCC_C_FILES				= $(notdir $(GCC_C_FILES_FULL))
+GCC_CC_FILES_FULL = $(wildcard $(patsubst %,%/*.cc,	$(FW_GCC_DIR)))
+GCC_CC_FILES			= $(notdir $(GCC_CC_FILES_FULL))
 
 #+ USB_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_USB_SRCDIR))))
 
@@ -425,11 +433,8 @@ OBJS_CORE = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_CORE_FILES))
 OBJ_DISCOVERY_FILES = $(DISCOVERY_C_FILES:.c=.o)
 OBJS_DISCOVERY = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DISCOVERY_FILES))
 
-OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o) $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o)
+OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o) $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o) $(GCC_C_FILES:.c=.o) $(GCC_CC_FILES:.cc=.o)
 OBJS_DRIVERS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DRIVERS_FILES))
-
-# OBJ_COMPONENT_FILES = $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o)
-# OBJS_COMPONENT = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_COMPONENT_FILES))
 
 OBJ_FILES = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.S=.o)
 OBJS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_FILES))
@@ -474,8 +479,8 @@ $(BUILD_DIR)%.elf: $(OBJS)
 $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
 .PHONY: ctags
-ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)  $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
-	@$(CTAGS) -R --sort=yes --c-kinds=+cdefglmnpstuvx --c++-kinds=+p --fields=+iaSm --extra=+q -f $(TAGS) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
+ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)  $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL)  $(COMPONENT_C_FILES_FULL) $(GCC_CC_FILES_FULL) $(GCC_C_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
+	@$(CTAGS) -R --sort=yes --c-kinds=+cdefglmnpstuvx --c++-kinds=+p --fields=+iaSm --extra=+q -f $(TAGS) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(GCC_CC_FILES_FULL) $(GCC_C_FILES_FULL) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
 
 clean_libs:
 	$(REMOVE) $(LIBS)

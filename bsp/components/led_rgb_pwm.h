@@ -31,8 +31,8 @@
 // - provide generic value for PWM period and PWM max duty cycle value
 // - provide a function to ramp color intensity with a logarithm speed
 
-#ifndef LED_RGB_H_
-#define LED_RGB_H_
+#ifndef LED_RGB_PWM_H_
+#define LED_RGB_PWM_H_
 
 #include "stm32f4xx_hal.h"
 #include "class_utils.h"
@@ -105,4 +105,4 @@ class LedRgbPwm {
 
 } // namespace led_rgb 
 
-#endif // LED_RGB_H_
+#endif // LED_RGB_PWM_H_

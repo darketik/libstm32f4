@@ -24,20 +24,51 @@
 //
 // -----------------------------------------------------------------------------
 //
+// API Driver for RGB LED.
+// RED - PC1
+// GREEN - PC2
+// BLUS - PC4
 
-#include <stdio.h>
 
-#ifdef __cplusplus
- extern "C" {
-#endif 
+#ifndef LED_RGB_H_
+#define LED_RGB_H_
 
-caddr_t __attribute__((weak))
-_sbrk (int incr)
-{
-	return (caddr_t) 0;
-}
+#include "stm32f4xx_hal.h"
+#include "class_utils.h"
+#include "system.h"
 
-#ifdef __cplusplus
-}
-#endif
+namespace led_rgb {
 
+class LedRgb {
+	public:
+		LedRgb (GPIO_TypeDef *GpioBank, uint16_t RedPin, uint16_t GreenPin, uint16_t BluePin) {
+				this->GpioBank = GpioBank;
+				this->RedPin = RedPin;
+				this->GreenPin = GreenPin;
+				this->BluePin = BluePin;
+			}
+		~LedRgb () {}
+
+		void init (void);
+		void SetRed (uint8_t val);
+		void SetGreen (uint8_t val);
+		void SetBlue (uint8_t val);
+		void On (void);
+		void Off (void);
+		
+	private:
+		uint8_t red;
+		uint8_t green;
+		uint8_t blue;
+
+		GPIO_TypeDef *GpioBank;
+		uint16_t RedPin;
+		uint16_t GreenPin;
+		uint16_t BluePin;
+
+		DISALLOW_COPY_AND_ASSIGN (LedRgb);
+};
+
+} // namespace led_rgb 
+
+#endif // LED_RGB_H_
