@@ -25,20 +25,12 @@
 // -----------------------------------------------------------------------------
 //
 
-#ifndef LIBSTM32F4_H_
-#define LIBSTM32F4_H_
+#ifndef CLASS_UTILS_H_
+#define CLASS_UTILS_H_
 
-#include "stm32f4xx_hal.h"
-#include "stm32f4_discovery.h"
-#include "arm_math.h"
 
-#include "system.h"
-#include "adc_temp.h"
-#include "lcd16x2.h"
+#define DISALLOW_COPY_AND_ASSIGN(TypeName) \
+  TypeName(const TypeName&);               \
+  void operator=(const TypeName&)
 
-using namespace std;
-using namespace adc_temp;
-using namespace lcd16x2;
-using namespace system_stm32f4;
-
-#endif // LIBSTM32F4_H_
+#endif // CLASS_UTILS_H_

@@ -36,11 +36,11 @@ BUILD_ROOT 						= build/
 BUILD_DIR 						= $(BUILD_ROOT)$(TARGET)/
 BUILD_OBJ 						= $(BUILD_ROOT)$(TARGET)/obj/
 
-LIBDIR								= $(BUILD_ROOT)lib/
+LIBDIR							= $(BUILD_ROOT)lib/
 
-CC 										= $(TOOLCHAIN_BIN)arm-none-eabi-gcc
-CXX 									= $(TOOLCHAIN_BIN)arm-none-eabi-g++
-AS 										= $(TOOLCHAIN_BIN)arm-none-eabi-as
+CC 								= $(TOOLCHAIN_BIN)arm-none-eabi-gcc
+CXX 								= $(TOOLCHAIN_BIN)arm-none-eabi-g++
+AS 								= $(TOOLCHAIN_BIN)arm-none-eabi-as
 OBJCOPY 							= $(TOOLCHAIN_BIN)arm-none-eabi-objcopy
 DB 										= $(TOOLCHAIN_BIN)arm-none-eabi-gdb
 OBJDUMP 							= $(TOOLCHAIN_BIN)arm-none-eabi-objdump
@@ -475,10 +475,7 @@ $(BUILD_DIR)%.map: $(BUILD_DIR)%.elf
 
 .PHONY: ctags
 ctags: $(CC_FILES_FULL) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL)  $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
-	@$(CTAGS) --sort=yes --c-kinds=+cdefglmnpstuvx -f $(TAGS) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) 
-	@$(CTAGS) -R --sort=yes --c-kinds=+cdefglmnpstuvx -f $(TAGS)  $(TOOLCHAIN_H_FILES_FULL) 
-
-# @$(CTAGS) -R --sort=yes --c++-kinds=+p --fields=+iaS --extra=+q --language-force=C++ -f $(TAGS) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(ALL_HPP_FILES_FULL)
+	@$(CTAGS) -R --sort=yes --c-kinds=+cdefglmnpstuvx --c++-kinds=+p --fields=+iaSm --extra=+q -f $(TAGS) $(C_FILES_FULL) $(AS_FILES_FULL) $(CORE_C_FILES_FULL) $(CORE_S_FILES_FULL) $(DRIVERS_C_FILES_FULL) $(DISCOVERY_C_FILES_FULL) $(CMSISDSP_C_FILES_FULL) $(ALL_H_FILES_FULL) $(ALL_HPP_FILES_FULL) $(COMPONENT_C_FILES_FULL) $(CC_FILES_FULL) $(COMPONENT_CC_FILES_FULL) $(TOOLCHAIN_H_FILES_FULL)
 
 clean_libs:
 	$(REMOVE) $(LIBS)

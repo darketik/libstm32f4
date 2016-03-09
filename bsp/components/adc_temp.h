@@ -24,21 +24,51 @@
 //
 // -----------------------------------------------------------------------------
 //
+// API Driver for ADC temperature sensor of stm32f407.
 
-#ifndef LIBSTM32F4_H_
-#define LIBSTM32F4_H_
+//TODO:
+// - check sampling time config in ADCx_ChannelConf face to TempSensor
+// constraint in datasheet
+// - Define a sampling rate to process tempsensor measure and configure it
+// using a timer trigger for the ADC
+
+#ifndef ADC_TEMP_H_
+#define ADC_TEMP_H_
 
 #include "stm32f4xx_hal.h"
-#include "stm32f4_discovery.h"
+#include "class_utils.h"
 #include "arm_math.h"
-
 #include "system.h"
-#include "adc_temp.h"
-#include "lcd16x2.h"
 
-using namespace std;
-using namespace adc_temp;
-using namespace lcd16x2;
-using namespace system_stm32f4;
+namespace adc_temp {
 
-#endif // LIBSTM32F4_H_
+#define ADCx_DMA_CHANNEL		DMA_CHANNEL_0
+#define ADCx_DMA_STREAM			DMA1_Stream0
+#define ADCx_DMA_CLK_ENABLE __HAL_RCC_DMA1_CLK_ENABLE
+#define ADCx_DMA_IRQn				DMA1_Stream0_IRQn
+#define ADCx_DMA_IRQHandler	DMA1_Stream0_IRQHandler
+
+#define ADCx 								ADC1
+#define ADCx_CLK_ENABLE 		__HAL_RCC_ADC1_CLK_ENABLE
+#define ADCx_CHANNEL				ADC_CHANNEL_TEMPSENSOR
+
+class AdcTemp {
+	public:
+		AdcTemp() { }
+		~AdcTemp() { }
+
+		void init (void);
+		ADC_HandleTypeDef * getAdcHandle(void);
+		q15_t getTemp(void);
+		
+	private:
+		uint16_t temp;
+		ADC_HandleTypeDef ADCx_Handle;
+		ADC_ChannelConfTypeDef ADCx_ChannelConf;
+
+		DISALLOW_COPY_AND_ASSIGN (AdcTemp);
+};
+
+} // namespace adc_temp 
+
+#endif // ADC_TEMP_H_

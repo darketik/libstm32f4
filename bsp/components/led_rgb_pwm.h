@@ -35,7 +35,7 @@
 #define LED_RGB_H_
 
 #include "stm32f4xx_hal.h"
-#include "libstm32f4.h"
+#include "class_utils.h"
 #include "system.h"
 
 namespace led_rgb_pwm {

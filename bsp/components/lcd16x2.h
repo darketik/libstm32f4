@@ -31,7 +31,7 @@
 #define LCD16x2_API_H_
 
 #include "stm32f4xx_hal.h"
-#include "libstm32f4.h"
+#include "class_utils.h"
 
 namespace lcd16x2 {
 

@@ -30,8 +30,8 @@
 #define SYSTEM_API_H_
 
 #include "stm32f4xx_hal.h"
-#include "libstm32f4.h"
 #include "stm32f4_discovery.h"
+#include "class_utils.h"
 
 namespace system_stm32f4 {
 
