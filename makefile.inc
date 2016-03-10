@@ -143,25 +143,31 @@ SEMIHOST							?= disable
 ifeq ($(SEMIHOST), disable)
 LDSEMIHOSTFLAGS				=  
 CSEMIHOSTDEFS					=  
-OPENOCDSEMIHOSTCMD		=
+OPENOCDSEMIHOSTCMD			=
 endif
 ifeq ($(SEMIHOST), enable)
 LDSEMIHOSTFLAGS				= --specs=rdimon.specs
 CSEMIHOSTDEFS					= -DSEMIHOST
-OPENOCDSEMIHOSTCMD		= -c "arm semihosting enable"
+OPENOCDSEMIHOSTCMD			= -c "arm semihosting enable"
 endif
 
 NEWLIB_NANO						?= enable
-ifeq ($(SEMIHOST), disable)
-LDNEWLIBNANOFLAGS				= --specs=nosys.specs
+ifeq ($(NEWLIB_NANO), disable)
+LDNEWLIBNANOFLAGS				= 
 endif
-ifeq ($(SEMIHOST), enable)
+ifeq ($(NEWLIB_NANO), enable)
 LDNEWLIBNANOFLAGS				= --specs=nano.specs
 endif
-#+ LDNEWLIBNANOFLAGS		= --specs=nosys.specs
 
+NOSYS								?= disable
+ifeq ($(NOSYS), disable)
+LDNOSYSFLAGS					= 
+endif
+ifeq ($(NOSYS), enable)
+LDNOSYSFLAGS					= --specs=nosys.specs
+endif
 
-INCFLAGS 							= -I. 
+INCFLAGS 						= -I. 
 
 WARNINGS							= -Wall \
 												-Werror \
@@ -216,6 +222,7 @@ LINKER_SCRIPT 				=	libstm32f4/linker_scripts/stm32f407vg_flash.ld
 LDFLAGS 							= $(CFLAGS) \
 												$(LDSEMIHOSTFLAGS) \
 												$(LDNEWLIBNANOFLAGS) \
+												$(LDNOSYSFLAGS) \
 												-Wl,--gc-sections \
 												-Wl,--relax \
 												-Wl,-Map=$(BUILD_DIR)$(TARGET).map \
