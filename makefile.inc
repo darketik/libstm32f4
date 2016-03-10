@@ -447,11 +447,11 @@ DEPS = 	$(OBJS:.o=.d) \
 				$(OBJS_COMPONENT:.o=.d) 
 
 
-.PHONY: all clean clean_libs clean_all libs
+.PHONY: all libs clean clean_libs clean_all
 
 all: $(BUILD_DIR) $(BUILD_OBJ) $(TARGET_HEX) $(TARGET_IHEX) $(TARGET_BIN) $(TARGET_SYM) $(TARGET_LSS) $(TARGET_DIS) $(TARGET_TOPSYM) size ramsize ctags
 
-libs: $(LIBDIR) $(LIBS) | $(BUILD_DIR) 
+libs: $(LIBDIR) $(LIBS) | $(BUILD_DIR) $(BUILD_OBJ)
 
 # ------------------------------------------------------------------------------
 # Main rules
