@@ -42,32 +42,36 @@
 
 namespace adc_temp {
 
-#define ADCx_DMA_CHANNEL		DMA_CHANNEL_0
-#define ADCx_DMA_STREAM			DMA1_Stream0
-#define ADCx_DMA_CLK_ENABLE __HAL_RCC_DMA1_CLK_ENABLE
-#define ADCx_DMA_IRQn				DMA1_Stream0_IRQn
+#define ADCx_DMA_STREAM		DMA1_Stream0
+#define ADCx_DMA_CHANNEL	DMA_CHANNEL_0
+#define ADCx_DMA_CLK_ENABLE 	__HAL_RCC_DMA1_CLK_ENABLE
+#define ADCx_DMA_IRQn		DMA1_Stream0_IRQn
 #define ADCx_DMA_IRQHandler	DMA1_Stream0_IRQHandler
 
-#define ADCx 								ADC1
-#define ADCx_CLK_ENABLE 		__HAL_RCC_ADC1_CLK_ENABLE
-#define ADCx_CHANNEL				ADC_CHANNEL_TEMPSENSOR
+#define ADCx 			ADC1
+#define ADCx_CLK_ENABLE 	__HAL_RCC_ADC1_CLK_ENABLE
+#define ADCx_CHANNEL		ADC_CHANNEL_TEMPSENSOR
+#define ADCx_FORCE_RESET 	__HAL_RCC_ADC_FORCE_RESET
+#define ADCx_RELEASE_RESET 	__HAL_RCC_ADC_RELEASE_RESET
+#define ADCx_IRQHandler	 	ADC_IRQHandler
 
-class AdcTemp {
-	public:
-		AdcTemp() { }
-		~AdcTemp() { }
+    class AdcTemp {
+    public:
+      AdcTemp() { }
+      ~AdcTemp() { }
 
-		void init (void);
-		ADC_HandleTypeDef * getAdcHandle(void);
-		q15_t getTemp(void);
-		
-	private:
-		uint16_t temp;
-		ADC_HandleTypeDef ADCx_Handle;
-		ADC_ChannelConfTypeDef ADCx_ChannelConf;
+      void init (void);
+      ADC_HandleTypeDef * getAdcHandle(void);
+      q15_t getTemp(void);
+      uint16_t getAdcValue(void);
 
-		DISALLOW_COPY_AND_ASSIGN (AdcTemp);
-};
+    private:
+      __IO uint16_t temp;
+      ADC_HandleTypeDef ADCx_Handle;
+      ADC_ChannelConfTypeDef ADCx_ChannelConf;
+
+      DISALLOW_COPY_AND_ASSIGN (AdcTemp);
+    };
 
 } // namespace adc_temp 
 

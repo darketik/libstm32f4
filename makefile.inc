@@ -36,11 +36,11 @@ BUILD_ROOT 						= build/
 BUILD_DIR 						= $(BUILD_ROOT)$(TARGET)/
 BUILD_OBJ 						= $(BUILD_ROOT)$(TARGET)/obj/
 
-LIBDIR							= $(BUILD_ROOT)lib/
+LIBDIR								= $(BUILD_ROOT)lib/
 
-CC 								= $(TOOLCHAIN_BIN)arm-none-eabi-gcc
-CXX 								= $(TOOLCHAIN_BIN)arm-none-eabi-g++
-AS 								= $(TOOLCHAIN_BIN)arm-none-eabi-as
+CC 										= $(TOOLCHAIN_BIN)arm-none-eabi-gcc
+CXX 									= $(TOOLCHAIN_BIN)arm-none-eabi-g++
+AS 										= $(TOOLCHAIN_BIN)arm-none-eabi-as
 OBJCOPY 							= $(TOOLCHAIN_BIN)arm-none-eabi-objcopy
 DB 										= $(TOOLCHAIN_BIN)arm-none-eabi-gdb
 OBJDUMP 							= $(TOOLCHAIN_BIN)arm-none-eabi-objdump
@@ -89,6 +89,7 @@ DEFS								= -D$(MODEL_DEFINE) \
 											-DUSE_STM32F4_DISCOVERY \
 											-D__VFP_FP__ \
 											-D__FPU_PRESENT=1U \
+											-D__FPU_USED=1U \
 											-DARM_MATH_CM4 \
 											-DGCC_ARMCM4 \
 											-DHSE_VALUE=$(F_CRYSTAL) \
@@ -143,20 +144,20 @@ SEMIHOST							?= disable
 ifeq ($(SEMIHOST), disable)
 LDSEMIHOSTFLAGS				=  
 CSEMIHOSTDEFS					=  
-OPENOCDSEMIHOSTCMD			=
+OPENOCDSEMIHOSTCMD		=
 endif
 ifeq ($(SEMIHOST), enable)
 LDSEMIHOSTFLAGS				= --specs=rdimon.specs
 CSEMIHOSTDEFS					= -DSEMIHOST
-OPENOCDSEMIHOSTCMD			= -c "arm semihosting enable"
+OPENOCDSEMIHOSTCMD		= -c "arm semihosting enable"
 endif
 
 NEWLIB_NANO						?= enable
 ifeq ($(NEWLIB_NANO), disable)
-LDNEWLIBNANOFLAGS				= 
+LDNEWLIBNANOFLAGS			= 
 endif
 ifeq ($(NEWLIB_NANO), enable)
-LDNEWLIBNANOFLAGS				= --specs=nano.specs
+LDNEWLIBNANOFLAGS			= --specs=nano.specs
 endif
 
 NOSYS								?= disable
@@ -167,7 +168,7 @@ ifeq ($(NOSYS), enable)
 LDNOSYSFLAGS					= --specs=nosys.specs
 endif
 
-INCFLAGS 						= -I. 
+INCFLAGS 							= -I. 
 
 WARNINGS							= -Wall \
 												-Werror \
@@ -188,7 +189,7 @@ CWARNINGS							= -Wbad-function-cast \
 												-Wstrict-prototypes 
 
 
-FLAGS								=		$(WARNINGS) \
+FLAGS									=	$(WARNINGS) \
 												$(DEFS) \
 												$(ARCHFLAGS) \
 												$(INCFLAGS) \
@@ -203,7 +204,7 @@ FLAGS								=		$(WARNINGS) \
 												-fmessage-length=0 \
 												-fno-move-loop-invariants
 
-CFLAGS 							= 	$(FLAGS) \
+CFLAGS 								=	$(FLAGS) \
 												$(CWARNINGS) \
 												-std=gnu99 \
 
@@ -286,8 +287,8 @@ DEP_FILE 							= $(BUILD_DIR)depends.mk
 # ------------------------------------------------------------------------------
 # Files and directories for the system firmware
 # ------------------------------------------------------------------------------
-LIBSTM32F4_PATH 			= libstm32f4/
-STM32_PATH 						= libstm32f4/third_party/STM32CubeF4/
+LIBSTM32F4_PATH 					= libstm32f4/
+STM32_PATH 								= libstm32f4/third_party/STM32CubeF4/
 
 FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver/
 FW_STDDRIVER_SRCDIR 			= $(FW_STDDRIVER_DIR)src
@@ -321,7 +322,7 @@ FW_DISCOVERY_DIR										= $(STM32_PATH)BSP/STM32F4-Discovery
 FW_MIDDLEWARE_DIR					= $(STM32_PATH)MiddleWares/
 FW_AUDIO_PDM_DIR					= $(FW_MIDDLEWARE_DIR)STM32_Audio/PDM
 
-FW_COMPONENT_DIR				  	= $(LIBSTM32F4_PATH)bsp/components
+FW_COMPONENT_DIR				  = $(LIBSTM32F4_PATH)bsp/components
 FW_GCC_DIR				  			= $(LIBSTM32F4_PATH)bsp/gcc
 
 #+ FW_USB_DIR 						= $(STM32_PATH)STM32_USB-FS-Device_Driver/
@@ -366,7 +367,7 @@ VPATH 								+= $(FW_CMSIS_STM32F4_DIR) \
 													$(FW_GCC_DIR) \
 													$(FW_COMPONENT_DIR)
 
-ALL_HPP_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
+ALL_HPP_FILES_FULL		= $(wildcard $(patsubst %,%/*.h, $(PACKAGES) \
 																	  $(FW_COMPONENT_DIR)))
 
 ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(LIBSTM32F4_PATH) \
@@ -407,16 +408,16 @@ CMSISDSP_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_CMSIS_DSP_BASIC_DIR)
 																												$(FW_CMSIS_DSP_STAT_DIR) \
 																												$(FW_CMSIS_DSP_SUPPORT_DIR) \
 																												$(FW_CMSIS_DSP_TRANSFORM_DIR)))
-CMSISDSP_C_FILES			= $(notdir $(CMSISDSP_C_FILES_FULL))
+CMSISDSP_C_FILES				= $(notdir $(CMSISDSP_C_FILES_FULL))
 
 COMPONENT_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_COMPONENT_DIR)))
 COMPONENT_C_FILES				= $(notdir $(COMPONENT_C_FILES_FULL))
 COMPONENT_CC_FILES_FULL = $(wildcard $(patsubst %,%/*.cc,	$(FW_COMPONENT_DIR)))
 COMPONENT_CC_FILES			= $(notdir $(COMPONENT_CC_FILES_FULL))
-GCC_C_FILES_FULL	= $(wildcard $(patsubst %,%/*.c,	$(FW_GCC_DIR)))
-GCC_C_FILES				= $(notdir $(GCC_C_FILES_FULL))
-GCC_CC_FILES_FULL = $(wildcard $(patsubst %,%/*.cc,	$(FW_GCC_DIR)))
-GCC_CC_FILES			= $(notdir $(GCC_CC_FILES_FULL))
+GCC_C_FILES_FULL				= $(wildcard $(patsubst %,%/*.c,	$(FW_GCC_DIR)))
+GCC_C_FILES							= $(notdir $(GCC_C_FILES_FULL))
+GCC_CC_FILES_FULL 			= $(wildcard $(patsubst %,%/*.cc,	$(FW_GCC_DIR)))
+GCC_CC_FILES						= $(notdir $(GCC_CC_FILES_FULL))
 
 #+ USB_C_FILES 					= $(notdir $(wildcard $(patsubst %,%/*.c,$(FW_USB_SRCDIR))))
 
