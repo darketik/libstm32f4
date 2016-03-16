@@ -32,11 +32,9 @@
 namespace adc_temp {
 
     void AdcTemp::init (void) {
-	HAL_ADC_DeInit (&ADCx_Handle);
-
 	// config ADCx 
 	ADCx_Handle.Instance = ADCx;
-	ADCx_Handle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+	ADCx_Handle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
 	ADCx_Handle.Init.Resolution = ADC_RESOLUTION_12B;
 	ADCx_Handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	ADCx_Handle.Init.ScanConvMode = DISABLE;

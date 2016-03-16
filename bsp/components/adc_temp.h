@@ -42,11 +42,11 @@
 
 namespace adc_temp {
 
-#define ADCx_DMA_STREAM		DMA1_Stream0
+#define ADCx_DMA_STREAM		DMA2_Stream0
 #define ADCx_DMA_CHANNEL	DMA_CHANNEL_0
-#define ADCx_DMA_CLK_ENABLE 	__HAL_RCC_DMA1_CLK_ENABLE
-#define ADCx_DMA_IRQn		DMA1_Stream0_IRQn
-#define ADCx_DMA_IRQHandler	DMA1_Stream0_IRQHandler
+#define ADCx_DMA_CLK_ENABLE 	__HAL_RCC_DMA2_CLK_ENABLE
+#define ADCx_DMA_IRQn		DMA2_Stream0_IRQn
+#define ADCx_DMA_IRQHandler	DMA2_Stream0_IRQHandler
 
 #define ADCx 			ADC1
 #define ADCx_CLK_ENABLE 	__HAL_RCC_ADC1_CLK_ENABLE
