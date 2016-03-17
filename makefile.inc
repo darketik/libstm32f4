@@ -158,6 +158,7 @@ LDNEWLIBNANOFLAGS			=
 endif
 ifeq ($(NEWLIB_NANO), enable)
 LDNEWLIBNANOFLAGS			= --specs=nano.specs
+#+ LDNEWLIBNANOFLAGS			= --specs=nano.specs -u _printf_float
 endif
 
 NOSYS								?= disable

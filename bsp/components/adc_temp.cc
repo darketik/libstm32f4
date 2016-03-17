@@ -34,7 +34,7 @@ namespace adc_temp {
     void AdcTemp::init (void) {
 	// config ADCx 
 	ADCx_Handle.Instance = ADCx;
-	ADCx_Handle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV8;
+	ADCx_Handle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
 	ADCx_Handle.Init.Resolution = ADC_RESOLUTION_12B;
 	ADCx_Handle.Init.DataAlign = ADC_DATAALIGN_RIGHT;
 	ADCx_Handle.Init.ScanConvMode = DISABLE;
@@ -56,16 +56,16 @@ namespace adc_temp {
 	// configure ADCx regular channel
 	ADCx_ChannelConf.Channel = ADC_CHANNEL_TEMPSENSOR;
 	ADCx_ChannelConf.Rank = 1;
-	// APB2_CLK = HCLK/2
+	// APB2_CLK = HCLK/2 (84 MHz)
 	// ADC_CLK = APB2_CLK/4 = 21MHz
 	// Total Time = (ADC_RES + Sampling time) / ADC_CLK
-	// 	      = 23.4 µs
+	// 	      = 6µs
 	// 
 	// carefull with internal measurement channels
 	// sampling time constraints must be respected 
 	// (sampling time can be adjusted in function of 
 	// ADC clock frequency and sampling time setting)
-	ADCx_ChannelConf.SamplingTime = ADC_SAMPLETIME_480CYCLES; 
+	ADCx_ChannelConf.SamplingTime = ADC_SAMPLETIME_112CYCLES; 
 	ADCx_ChannelConf.Offset = 0;
 
 	// initialiaze ADCx Channel
@@ -87,34 +87,35 @@ namespace adc_temp {
 
 
 
-    q15_t AdcTemp::getTemp(void) {
+    float32_t AdcTemp::getTemp(void) {
 	// temp(C) = (Vsense - V25) / Avg_slope + 25
 	// Vsense is in mV
 	// Avg_slope = 25mV/C (they say 2.5mV/C in datasheet, i think its wrong)
 	// V25 = 0.76V 
-	float temp_c;
-	q15_t temp_c_int;
-	float vsense;
-	uint16_t temp_adc;
-	const static float avg_slope = 25.0f;
-	const static float v_25 = 0.76f;
-	const static float v_powersupply = 3000.0f;
+	float32_t temp_c;
+	float32_t vsense;
+	uint32_t temp_adc_i;
+
+	const static float32_t avg_slope = 25.0f; //2.5mV/C seems wrong
+	const static float32_t v_25 = 760.0f;
+	const static float32_t v_powersupply = 3000.0f;
 	//+ const static float adc_max_value_12b = 0xfff;
-	const static float adc_max_value_12b = 4096.0f;
+	const static float32_t adc_max_value_12b = 4096.0f;
+	const static float32_t v_per_bit = v_powersupply / adc_max_value_12b;
+	const static float32_t temp_offset = 25.0f;
 
+	temp_adc_i = this->temp;
 	// transform adc measured 12b int value into volt
-	temp_adc = this->temp;
-	vsense = (((float)(temp_adc) * v_powersupply) / adc_max_value_12b) / 1000.0f ;
+	vsense = (float)temp_adc_i * v_per_bit;
 	// apply temperature in C formula
-	temp_c = ((vsense - v_25) / avg_slope) + 25.0f;
-	arm_float_to_q15 (&temp_c, &temp_c_int, 1);
+	temp_c = ((vsense - v_25) / avg_slope) + temp_offset;
 
-	return temp_c_int;
+	return temp_c;
     }
 
 
 
-    uint16_t AdcTemp::getAdcValue(void) {
+    uint32_t AdcTemp::getAdcValue(void) {
 	return (this->temp);
     }
 

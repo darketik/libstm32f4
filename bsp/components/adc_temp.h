@@ -62,11 +62,11 @@ namespace adc_temp {
 
       void init (void);
       ADC_HandleTypeDef * getAdcHandle(void);
-      q15_t getTemp(void);
-      uint16_t getAdcValue(void);
+      float32_t getTemp(void);
+      uint32_t getAdcValue(void);
 
     private:
-      __IO uint16_t temp;
+      __IO uint32_t temp;
       ADC_HandleTypeDef ADCx_Handle;
       ADC_ChannelConfTypeDef ADCx_ChannelConf;
 
