@@ -161,7 +161,7 @@ extern "C" {
 	__HAL_LINKDMA (hadc, DMA_Handle, DMAx_Handle);
 
 	// NVIC for DMA transvfer complete IT
-	HAL_NVIC_SetPriority (ADCx_DMA_IRQn, 0, 0);
+	HAL_NVIC_SetPriority (ADCx_DMA_IRQn, 3, 0);
 	HAL_NVIC_EnableIRQ (ADCx_DMA_IRQn);
     }
 

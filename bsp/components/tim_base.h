@@ -24,29 +24,45 @@
 //
 // -----------------------------------------------------------------------------
 //
+// API Driver for Base Timer of stm32f407.
 
-#ifndef LIBSTM32F4_H_
-#define LIBSTM32F4_H_
+#ifndef TIM_BASE_H_
+#define TIM_BASE_H_
 
 #include "stm32f4xx_hal.h"
-#include "stm32f4_discovery.h"
-#include "arm_math.h"
-
+#include "class_utils.h"
 #include "system.h"
-#include "adc_temp.h"
-#include "adc_temp_tim_trig.h"
-#include "tim_base.h"
-#include "lcd16x2.h"
-#include "led_rgb.h"
-#include "led_rgb_pwm.h"
 
-using namespace std;
-using namespace adc_temp;
-using namespace adc_temp_tim_trig;
-using namespace tim_base;
-using namespace lcd16x2;
-using namespace system_stm32f4;
-using namespace led_rgb_pwm;
-using namespace led_rgb;
+namespace tim_base {
 
-#endif // LIBSTM32F4_H_
+#define TIMx_CLK_ENABLE	__HAL_RCC_TIM3_CLK_ENABLE
+#define TIMx_IRQHandler	TIM3_IRQHandler
+#define TIMx_IRQn	TIM3_IRQn
+
+    class TimBase {
+    public:
+      TimBase(TIM_TypeDef * TIMx,
+	      uint32_t TIMx_clock,
+	      uint32_t TIMx_period) {
+	  this->TIMx = TIMx;
+	  this->TIMx_clock = TIMx_clock;
+	  this->TIMx_period = TIMx_period;
+      }
+      ~TimBase() { }
+
+      void init (void);
+      TIM_HandleTypeDef * getHandle (void);
+
+    private:
+      TIM_TypeDef * TIMx;
+      uint32_t TIMx_clock; 
+      uint32_t TIMx_period; 
+      TIM_HandleTypeDef TIMx_Handle;
+      TIM_MasterConfigTypeDef TIMx_MasterConfig_InitStruct;
+
+      DISALLOW_COPY_AND_ASSIGN (TimBase);
+    };
+
+} // namespace tim_base 
+
+#endif // TIM_BASE_H_

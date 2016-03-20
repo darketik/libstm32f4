@@ -32,45 +32,6 @@
 namespace adc_temp_tim_trig {
 
     void AdcTempTimTrig::init (void) {
-	uint32_t uPrescaler = 0;
-	// To find prescaler value:
-	// TIMx is on APB1 and APB1 clk_div = 4 
-	// so TIMx CLK = 2 * APB1_CLK  (because apb1 clk_div not equal to 1)
-	// or APB1_CLK = HCLK / 4
-	// so TIMx_CLK = HCLK / 2 = SystemCoreClock / 2
-	// Prescaler = (TIMx_CLK / TIMx counter clock) - 1
-	//
-	// freq computation
-	// Freq = TIMx_CLK / ARR(TIMx_period)
-	SystemCoreClock = HAL_RCC_GetHCLKFreq ();
-	uPrescaler = (uint32_t) ((SystemCoreClock / 2) / TIMx_clock) - 1;
-
-	// configure timer
-	TIMx_Handle.Instance = TIMx;
-	TIMx_Handle.Init.Prescaler = uPrescaler;
-	TIMx_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	TIMx_Handle.Init.Period = TIMx_period - 1; 
-	TIMx_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-
-	ADCx_TIM_CLK_ENABLE ();
-	// below function uses user definition of HAL_TIM_PWM_MspInit
-	if (HAL_TIM_Base_Init (&TIMx_Handle) != HAL_OK) {
-		Error_Handler ();
-	}
-
-	// configure PWM channels
-	TIMx_OC_InitStruct.OCMode = TIM_OCMODE_TIMING;
-	TIMx_OC_InitStruct.OCPolarity = TIM_OCPOLARITY_HIGH;
-	TIMx_OC_InitStruct.OCFastMode = TIM_OCFAST_DISABLE;
-	TIMx_OC_InitStruct.OCNPolarity = 0; // dummy to bypass assert_param check
-	TIMx_OC_InitStruct.OCNIdleState = 0; // dummy to bypass assert_param check
-	TIMx_OC_InitStruct.OCIdleState = 0; // dummy to bypass assert_param check
-	TIMx_OC_InitStruct.Pulse = TIMx_PWM_DEFAULT_DUTY_CYCLE; 
-
-	if (HAL_TIM_Base_Start (&TIMx_Handle) != HAL_OK) {
-		Error_Handler ();
-	}
-
 	// config ADCx 
 	ADCx_Handle.Instance = ADCx;
 	ADCx_Handle.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
@@ -82,7 +43,7 @@ namespace adc_temp_tim_trig {
 	ADCx_Handle.Init.NbrOfConversion = 1;
 	ADCx_Handle.Init.DiscontinuousConvMode = DISABLE;
 	ADCx_Handle.Init.NbrOfDiscConversion = 0;
-	ADCx_Handle.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T3_CC1;
+	ADCx_Handle.Init.ExternalTrigConv = ADC_EXTERNALTRIGCONV_T3_TRGO;
 	ADCx_Handle.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
 	ADCx_Handle.Init.DMAContinuousRequests = ENABLE;
 
@@ -96,14 +57,14 @@ namespace adc_temp_tim_trig {
 	ADCx_ChannelConf.Rank = 1;
 	// APB2_CLK = HCLK/2 (84 MHz)
 	// ADC_CLK = APB2_CLK/4 = 21MHz
-	// Total Time = (ADC_RES + Sampling time) / ADC_CLK
-	// 	      = 6µs
+	// Total Conversion Time = (ADC_RES + Sampling time) / ADC_CLK
+	// 	      		 = 6µs
 	// 
 	// carefull with internal measurement channels
 	// sampling time constraints must be respected 
 	// (sampling time can be adjusted in function of 
 	// ADC clock frequency and sampling time setting)
-	ADCx_ChannelConf.SamplingTime = ADC_SAMPLETIME_112CYCLES; 
+	ADCx_ChannelConf.SamplingTime = ADC_SAMPLETIME_480CYCLES; 
 	ADCx_ChannelConf.Offset = 0;
 
 	// initialiaze ADCx Channel
@@ -165,51 +126,51 @@ namespace adc_temp_tim_trig {
 extern "C" {
 #endif 
 
-    void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc) {
-	static DMA_HandleTypeDef DMAx_Handle;
+    //+ void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc) {
+    //+     static DMA_HandleTypeDef DMAx_Handle;
 
-	// init ADCx clock
-	ADCx_CLK_ENABLE ();
+    //+     // init ADCx clock
+    //+     ADCx_CLK_ENABLE ();
 
-	// init DMAx CLK, 2 streams, link DMA HAndle, set priority and enable transfer
-	// complete IT on the 2 streams. 
-	// config DMAx 
-	ADCx_DMA_CLK_ENABLE ();
+    //+     // init DMAx CLK, 2 streams, link DMA HAndle, set priority and enable transfer
+    //+     // complete IT on the 2 streams. 
+    //+     // config DMAx 
+    //+     ADCx_DMA_CLK_ENABLE ();
 
-	DMAx_Handle.Instance = ADCx_DMA_STREAM;
-	DMAx_Handle.Init.Channel = ADCx_DMA_CHANNEL;
-	DMAx_Handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
-	DMAx_Handle.Init.PeriphInc = DMA_PINC_DISABLE;
-	DMAx_Handle.Init.MemInc = DMA_MINC_ENABLE;
-	DMAx_Handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-	DMAx_Handle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-	DMAx_Handle.Init.Mode = DMA_CIRCULAR;
-	DMAx_Handle.Init.Priority = DMA_PRIORITY_HIGH;
-	DMAx_Handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-	DMAx_Handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
-	DMAx_Handle.Init.MemBurst = DMA_MBURST_SINGLE;
-	DMAx_Handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+    //+     DMAx_Handle.Instance = ADCx_DMA_STREAM;
+    //+     DMAx_Handle.Init.Channel = ADCx_DMA_CHANNEL;
+    //+     DMAx_Handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
+    //+     DMAx_Handle.Init.PeriphInc = DMA_PINC_DISABLE;
+    //+     DMAx_Handle.Init.MemInc = DMA_MINC_ENABLE;
+    //+     DMAx_Handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+    //+     DMAx_Handle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+    //+     DMAx_Handle.Init.Mode = DMA_CIRCULAR;
+    //+     DMAx_Handle.Init.Priority = DMA_PRIORITY_HIGH;
+    //+     DMAx_Handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+    //+     DMAx_Handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+    //+     DMAx_Handle.Init.MemBurst = DMA_MBURST_SINGLE;
+    //+     DMAx_Handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
 
-	// initialize DMAx 
-	if (HAL_DMA_Init (&DMAx_Handle) != HAL_OK) {
-	    Error_Handler ();
-	}
+    //+     // initialize DMAx 
+    //+     if (HAL_DMA_Init (&DMAx_Handle) != HAL_OK) {
+    //+         Error_Handler ();
+    //+     }
 
-	// link DMA handle to ADC Handle
-	__HAL_LINKDMA (hadc, DMA_Handle, DMAx_Handle);
+    //+     // link DMA handle to ADC Handle
+    //+     __HAL_LINKDMA (hadc, DMA_Handle, DMAx_Handle);
 
-	// NVIC for DMA transvfer complete IT
-	HAL_NVIC_SetPriority (ADCx_DMA_IRQn, 0, 0);
-	HAL_NVIC_EnableIRQ (ADCx_DMA_IRQn);
-    }
-
-
+    //+     // NVIC for DMA transvfer complete IT
+    //+     HAL_NVIC_SetPriority (ADCx_DMA_IRQn, 0, 0);
+    //+     HAL_NVIC_EnableIRQ (ADCx_DMA_IRQn);
+    //+ }
 
 
-    void HAL_ADC_MspDeInit (ADC_HandleTypeDef* hadc) {
-	ADCx_FORCE_RESET ();
-	ADCx_RELEASE_RESET ();
-    }
+
+
+    //+ void HAL_ADC_MspDeInit (ADC_HandleTypeDef* hadc) {
+    //+     ADCx_FORCE_RESET ();
+    //+     ADCx_RELEASE_RESET ();
+    //+ }
 
 #ifdef __cplusplus
 }

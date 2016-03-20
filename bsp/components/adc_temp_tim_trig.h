@@ -55,19 +55,9 @@ namespace adc_temp_tim_trig {
 #define ADCx_RELEASE_RESET 	__HAL_RCC_ADC_RELEASE_RESET
 #define ADCx_IRQHandler	 	ADC_IRQHandler
 
-#define ADCx_TIM_CLK_ENABLE	__HAL_RCC_TIM3_CLK_ENABLE
-
     class AdcTempTimTrig {
     public:
-      AdcTempTimTrig(TIM_TypeDef * TIMx,
-		     uint8_t TIMx_af,
-		     uint32_t TIMx_clock
-		     uint32_t TIMx_period) {
-	  this->TIMx = TIMx;
-	  this->TIMx_af = TIMx_af;
-	  this->TIMx_clock = TIMx_clock;
-	  this->TIMx_period = TIMx_period;
-      }
+      AdcTempTimTrig() { }
       ~AdcTempTimTrig() { }
 
       void init (void);
@@ -79,13 +69,6 @@ namespace adc_temp_tim_trig {
       __IO uint32_t temp;
       ADC_HandleTypeDef ADCx_Handle;
       ADC_ChannelConfTypeDef ADCx_ChannelConf;
-
-      TIM_TypeDef * TIMx;
-      uint8_t TIMx_af;
-      uint32_t TIMx_clock; 
-      uint32_t TIMx_period; 
-      TIM_HandleTypeDef TIMx_Handle;
-      TIM_OC_InitTypeDef TIMx_OC_InitStruct;
 
       DISALLOW_COPY_AND_ASSIGN (AdcTempTimTrig);
     };
