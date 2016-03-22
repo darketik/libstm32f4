@@ -126,51 +126,51 @@ namespace adc_temp_tim_trig {
 extern "C" {
 #endif 
 
-    //+ void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc) {
-    //+     static DMA_HandleTypeDef DMAx_Handle;
+    void HAL_ADC_MspInit (ADC_HandleTypeDef* hadc) {
+	static DMA_HandleTypeDef DMAx_Handle;
 
-    //+     // init ADCx clock
-    //+     ADCx_CLK_ENABLE ();
+	// init ADCx clock
+	ADCx_CLK_ENABLE ();
 
-    //+     // init DMAx CLK, 2 streams, link DMA HAndle, set priority and enable transfer
-    //+     // complete IT on the 2 streams. 
-    //+     // config DMAx 
-    //+     ADCx_DMA_CLK_ENABLE ();
+	// init DMAx CLK, 2 streams, link DMA HAndle, set priority and enable transfer
+	// complete IT on the 2 streams. 
+	// config DMAx 
+	ADCx_DMA_CLK_ENABLE ();
 
-    //+     DMAx_Handle.Instance = ADCx_DMA_STREAM;
-    //+     DMAx_Handle.Init.Channel = ADCx_DMA_CHANNEL;
-    //+     DMAx_Handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
-    //+     DMAx_Handle.Init.PeriphInc = DMA_PINC_DISABLE;
-    //+     DMAx_Handle.Init.MemInc = DMA_MINC_ENABLE;
-    //+     DMAx_Handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-    //+     DMAx_Handle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-    //+     DMAx_Handle.Init.Mode = DMA_CIRCULAR;
-    //+     DMAx_Handle.Init.Priority = DMA_PRIORITY_HIGH;
-    //+     DMAx_Handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-    //+     DMAx_Handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
-    //+     DMAx_Handle.Init.MemBurst = DMA_MBURST_SINGLE;
-    //+     DMAx_Handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+	DMAx_Handle.Instance = ADCx_DMA_STREAM;
+	DMAx_Handle.Init.Channel = ADCx_DMA_CHANNEL;
+	DMAx_Handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
+	DMAx_Handle.Init.PeriphInc = DMA_PINC_DISABLE;
+	DMAx_Handle.Init.MemInc = DMA_MINC_ENABLE;
+	DMAx_Handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+	DMAx_Handle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+	DMAx_Handle.Init.Mode = DMA_CIRCULAR;
+	DMAx_Handle.Init.Priority = DMA_PRIORITY_HIGH;
+	DMAx_Handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	DMAx_Handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+	DMAx_Handle.Init.MemBurst = DMA_MBURST_SINGLE;
+	DMAx_Handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
 
-    //+     // initialize DMAx 
-    //+     if (HAL_DMA_Init (&DMAx_Handle) != HAL_OK) {
-    //+         Error_Handler ();
-    //+     }
+	// initialize DMAx 
+	if (HAL_DMA_Init (&DMAx_Handle) != HAL_OK) {
+	    Error_Handler ();
+	}
 
-    //+     // link DMA handle to ADC Handle
-    //+     __HAL_LINKDMA (hadc, DMA_Handle, DMAx_Handle);
+	// link DMA handle to ADC Handle
+	__HAL_LINKDMA (hadc, DMA_Handle, DMAx_Handle);
 
-    //+     // NVIC for DMA transvfer complete IT
-    //+     HAL_NVIC_SetPriority (ADCx_DMA_IRQn, 0, 0);
-    //+     HAL_NVIC_EnableIRQ (ADCx_DMA_IRQn);
-    //+ }
-
-
+	// NVIC for DMA transvfer complete IT
+	HAL_NVIC_SetPriority (ADCx_DMA_IRQn, 0, 0);
+	HAL_NVIC_EnableIRQ (ADCx_DMA_IRQn);
+    }
 
 
-    //+ void HAL_ADC_MspDeInit (ADC_HandleTypeDef* hadc) {
-    //+     ADCx_FORCE_RESET ();
-    //+     ADCx_RELEASE_RESET ();
-    //+ }
+
+
+    void HAL_ADC_MspDeInit (ADC_HandleTypeDef* hadc) {
+	ADCx_FORCE_RESET ();
+	ADCx_RELEASE_RESET ();
+    }
 
 #ifdef __cplusplus
 }

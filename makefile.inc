@@ -65,7 +65,6 @@ STM32LOADER_PATH 			= libstm32f4/programming/serial/
 OPENOCD_SCRIPTS_PATH 	= libstm32f4/programming/jtag/
 
 TAGS									= tags
-CCTAGS								= tags_cc
 
 # ------------------------------------------------------------------------------
 # Platform specific flags
@@ -230,37 +229,39 @@ LDFLAGS 							= $(CFLAGS) \
 												-Wl,-Map=$(BUILD_DIR)$(TARGET).map \
 												-T $(LINKER_SCRIPT) \
 												-L$(LIBDIR) \
+												-L$(LIBRELEASEDIR) \
 												-L$(FW_AUDIO_PDM_DIR)
 
 # ------------------------------------------------------------------------------
 # libraries definition
+# Carefull to the dependency order
 # ------------------------------------------------------------------------------
+# bsp components lib
+LIBCOMPONENT 		:= $(LIBDIR)libcomponent.a
+LIBS						+= $(LIBCOMPONENT)
+LDLIBS					+= -lcomponent
+
+LDLIBS					+= -lPDMFilter_CM4F_GCC
+
 # standard peripheral lib
-LIBSTDPERIPH 		:= $(LIBDIR)libstdperiph.a
-LIBS						+= $(LIBSTDPERIPH)
+LIBSTDPERIPH 		:= $(LIBRELEASEDIR)libstdperiph.a
+#LIBS						+= $(LIBSTDPERIPH)
 LDLIBS					+= -lstdperiph
 
 # stm32f4 discovery board lib
-LIBDISCOVERY		:= $(LIBDIR)libdiscovery.a
-LIBS						+= $(LIBDISCOVERY)
+LIBDISCOVERY		:= $(LIBRELEASEDIR)libdiscovery.a
+#LIBS						+= $(LIBDISCOVERY)
 LDLIBS					+= -ldiscovery
 
 # cmsis stm32f4
-LIBCMSISSTM32F4	:= $(LIBDIR)libcmsisstm32f4.a
-LIBS						+= $(LIBCMSISSTM32F4)
+LIBCMSISSTM32F4	:= $(LIBRELEASEDIR)libcmsisstm32f4.a
+#LIBS						+= $(LIBCMSISSTM32F4)
 LDLIBS					+= -lcmsisstm32f4
 
 # cmsis DSP_Lib
-LIBCMSISDSP 		:= $(LIBDIR)libcmsisdsp.a
-LIBS						+= $(LIBCMSISDSP)
+LIBCMSISDSP 		:= $(LIBRELEASEDIR)libcmsisdsp.a
+#LIBS						+= $(LIBCMSISDSP)
 LDLIBS					+= -lcmsisdsp
-
-# bsp components lib
-# LIBCOMPONENT 		:= $(LIBDIR)libcomponent.a
-# LIBS						+= $(LIBCOMPONENT)
-# LDLIBS					+= -lcomponent
-
-LDLIBS					+= -lPDMFilter_CM4F_GCC
 
 # ------------------------------------------------------------------------------
 # Files and directories for the user code
@@ -290,6 +291,7 @@ DEP_FILE 							= $(BUILD_DIR)depends.mk
 # ------------------------------------------------------------------------------
 LIBSTM32F4_PATH 					= libstm32f4/
 STM32_PATH 								= libstm32f4/third_party/STM32CubeF4/
+LIBRELEASEDIR					    = $(STM32_PATH)lib/
 
 FW_STDDRIVER_DIR 					= $(STM32_PATH)STM32F4xx_HAL_Driver/
 FW_STDDRIVER_SRCDIR 			= $(FW_STDDRIVER_DIR)src
@@ -345,6 +347,7 @@ INCFLAGS 							+= -I$(LIBSTM32F4_PATH) \
 												 -I$(FW_LIS3DSH_DIR) \
 												 -I$(FW_LIS302DL_DIR) \
 												 -I$(FW_AUDIO_PDM_DIR) \
+												 -I$(LIBRELEASEDIR) \
 												 -I$(FW_GCC_DIR) \
 												 -I$(FW_COMPONENT_DIR)
 
@@ -384,6 +387,7 @@ ALL_H_FILES_FULL			= $(wildcard $(patsubst %,%/*.h, $(LIBSTM32F4_PATH) \
 																											 $(FW_CS43L22_DIR) \
 																											 $(FW_LIS3DSH_DIR) \
 																											 $(FW_LIS302DL_DIR) \
+																											 $(LIBRELEASEDIR) \
 																											 $(FW_AUDIO_PDM_DIR)))
 
 TOOLCHAIN_H_FILES_FULL = $(wildcard $(patsubst %,%/*.h, $(TOOLCHAIN_INCDIR)))
@@ -442,19 +446,22 @@ OBJS_CORE = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_CORE_FILES))
 OBJ_DISCOVERY_FILES = $(DISCOVERY_C_FILES:.c=.o)
 OBJS_DISCOVERY = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DISCOVERY_FILES))
 
-OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o) $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o) $(GCC_C_FILES:.c=.o) $(GCC_CC_FILES:.cc=.o)
+OBJ_DRIVERS_FILES = $(DRIVERS_C_FILES:.c=.o)
 OBJS_DRIVERS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_DRIVERS_FILES))
+
+OBJ_COMPONENT_FILES = $(COMPONENT_C_FILES:.c=.o) $(COMPONENT_CC_FILES:.cc=.o) $(GCC_C_FILES:.c=.o) $(GCC_CC_FILES:.cc=.o)
+OBJS_COMPONENT = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_COMPONENT_FILES))
 
 OBJ_FILES = $(CC_FILES:.cc=.o) $(C_FILES:.c=.o) $(AS_FILES:.S=.o)
 OBJS = $(patsubst %,$(BUILD_OBJ)%,$(OBJ_FILES))
 
 DEPS = 	$(OBJS:.o=.d) \
-				$(OBJS_DRIVERS:.o=.d) \
-				$(OBJS_DISCOVERY:.o=.d) \
-				$(OBJS_CMSISDSP:.o=.d) \
-				$(OBJS_CORE:.o=.d) \
 				$(OBJS_COMPONENT:.o=.d) 
 
+#				$(OBJS_DRIVERS:.o=.d) \
+#				$(OBJS_DISCOVERY:.o=.d) \
+#				$(OBJS_CMSISDSP:.o=.d) \
+#				$(OBJS_CORE:.o=.d) \
 
 .PHONY: all libs clean clean_libs clean_all
 
@@ -495,7 +502,7 @@ clean_libs:
 	$(REMOVE) $(LIBS)
  
 clean:
-	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(TAGS) $(CCTAGS)
+	$(REMOVE) $(OBJS) $(OBJS_DRIVERS) $(OBJS_DISCOVERY) $(OBJS_CORE) $(OBJS_CMSISDSP) $(TARGETS) $(DEP_FILE) $(DEPS) $(TAGS) 
   
 clean_all:
 	$(MAKE) -f $(TARGET)/Makefile clean clean_libs
@@ -506,30 +513,30 @@ size: $(TARGET_SIZE)
 ramsize: $(TARGET_SIZE)
 	@cat $(TARGET_SIZE) | awk '{ print $$2+$$3 }' | tail -n1 $(FORMAT_RAMSIZE)
 
-$(LIBSTDPERIPH): $(OBJS_DRIVERS)
-	@echo "[AR] $@"
-	@$(AR) -cru $@ $^
-	@$(RANLIB) $@
+#$(LIBSTDPERIPH): $(OBJS_DRIVERS)
+#	@echo "[AR] $@"
+#	@$(AR) -cru $@ $^
+#	@$(RANLIB) $@
+#
+#$(LIBDISCOVERY): $(OBJS_DISCOVERY)
+#	@echo "[AR] $@"
+#	@$(AR) -cru $@ $^
+#	@$(RANLIB) $@
+#
+#$(LIBCMSISSTM32F4): $(OBJS_CORE)
+#	@echo "[AR] $@"
+#	@$(AR) -cru $@ $^
+#	@$(RANLIB) $@
+#
+#$(LIBCMSISDSP): $(OBJS_CMSISDSP)
+#	@echo "[AR] $@"
+#	@$(AR) -cru $@ $^
+#	@$(RANLIB) $@
 
-$(LIBDISCOVERY): $(OBJS_DISCOVERY)
+$(LIBCOMPONENT): $(OBJS_COMPONENT)
 	@echo "[AR] $@"
-	@$(AR) -cru $@ $^
+	@$(AR) -cru $@ $^ 
 	@$(RANLIB) $@
-
-$(LIBCMSISSTM32F4): $(OBJS_CORE)
-	@echo "[AR] $@"
-	@$(AR) -cru $@ $^
-	@$(RANLIB) $@
-
-$(LIBCMSISDSP): $(OBJS_CMSISDSP)
-	@echo "[AR] $@"
-	@$(AR) -cru $@ $^
-	@$(RANLIB) $@
-
-# $(LIBCOMPONENT): $(OBJS_COMPONENT)
-# 	@echo "[AR] $@"
-# 	@$(AR) -cru $@ $^
-# 	@$(RANLIB) $@
 
 include $(DEP_FILE)
 

@@ -33,20 +33,8 @@
 #include "arm_math.h"
 
 #include "system.h"
-#include "adc_temp.h"
-#include "adc_temp_tim_trig.h"
-#include "tim_base.h"
-#include "lcd16x2.h"
-#include "led_rgb.h"
-#include "led_rgb_pwm.h"
 
 using namespace std;
-using namespace adc_temp;
-using namespace adc_temp_tim_trig;
-using namespace tim_base;
-using namespace lcd16x2;
 using namespace system_stm32f4;
-using namespace led_rgb_pwm;
-using namespace led_rgb;
 
 #endif // LIBSTM32F4_H_

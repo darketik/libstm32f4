@@ -31,71 +31,71 @@
 
 namespace lcd16x2 {
 
-#define HD44780_CLEAR                          0x01
+#define HD44780_CLEAR                  0x01
 
-#define HD44780_HOME                           0x02
+#define HD44780_HOME                   0x02
 
-#define HD44780_ENTRY_MODE                     0x04
-        #define HD44780_EM_SHIFT_CURSOR        0x00
-        #define HD44780_EM_SHIFT_DISPLAY       0x01
-        #define HD44780_EM_DECREMENT           0x00
-        #define HD44780_EM_INCREMENT           0x02
+#define HD44780_ENTRY_MODE             0x04
+#define HD44780_EM_SHIFT_CURSOR        0x00
+#define HD44780_EM_SHIFT_DISPLAY       0x01
+#define HD44780_EM_DECREMENT           0x00
+#define HD44780_EM_INCREMENT           0x02
 
-#define HD44780_DISPLAY_ONOFF                  0x08
-        #define HD44780_DISPLAY_OFF            0x00
-        #define HD44780_DISPLAY_ON             0x04
-        #define HD44780_CURSOR_OFF             0x00
-        #define HD44780_CURSOR_ON              0x02
-        #define HD44780_CURSOR_NOBLINK     	   0x00
-        #define HD44780_CURSOR_BLINK           0x01
+#define HD44780_DISPLAY_ONOFF          0x08
+#define HD44780_DISPLAY_OFF            0x00
+#define HD44780_DISPLAY_ON             0x04
+#define HD44780_CURSOR_OFF             0x00
+#define HD44780_CURSOR_ON              0x02
+#define HD44780_CURSOR_NOBLINK         0x00
+#define HD44780_CURSOR_BLINK           0x01
 
-#define HD44780_DISPLAY_CURSOR_SHIFT 					 0x10
-        #define HD44780_SHIFT_CURSOR           0x00
-        #define HD44780_SHIFT_DISPLAY          0x08
-        #define HD44780_SHIFT_LEFT             0x00
-        #define HD44780_SHIFT_RIGHT            0x04
+#define HD44780_DISPLAY_CURSOR_SHIFT   0x10
+#define HD44780_SHIFT_CURSOR           0x00
+#define HD44780_SHIFT_DISPLAY          0x08
+#define HD44780_SHIFT_LEFT             0x00
+#define HD44780_SHIFT_RIGHT            0x04
 
-#define HD44780_FUNCTION_SET                   0x20
-        #define HD44780_FONT5x7                0x00
-        #define HD44780_FONT5x10               0x04
-        #define HD44780_ONE_LINE               0x00
-        #define HD44780_TWO_LINE               0x08
-        #define HD44780_4_BIT                  0x00
-        #define HD44780_8_BIT                  0x10
+#define HD44780_FUNCTION_SET           0x20
+#define HD44780_FONT5x7                0x00
+#define HD44780_FONT5x10               0x04
+#define HD44780_ONE_LINE               0x00
+#define HD44780_TWO_LINE               0x08
+#define HD44780_4_BIT                  0x00
+#define HD44780_8_BIT                  0x10
 
-#define HD44780_CGRAM_SET                      0x40
-#define HD44780_DDRAM_SET                      0x80
+#define HD44780_CGRAM_SET              0x40
+#define HD44780_DDRAM_SET              0x80
 
-#define PROGRESSPIXELS_PER_CHAR									5
+#define PROGRESSPIXELS_PER_CHAR	       5
 
-static const uint8_t CustomChar [] =
-{
+    static const uint8_t CustomChar [] =
+      {
 	0x00, 0x1F, 0x00, 0x00, 0x00, 0x00, 0x1F, 0x00, // 0. 0/5 full progress block
 	0x00, 0x1F, 0x10, 0x10, 0x10, 0x10, 0x1F, 0x00, // 1. 1/5 full progress block
 	0x00, 0x1F, 0x18, 0x18, 0x18, 0x18, 0x1F, 0x00, // 2. 2/5 full progress block
 	0x00, 0x1F, 0x1C, 0x1C, 0x1C, 0x1C, 0x1F, 0x00, // 3. 3/5 full progress block
 	0x00, 0x1F, 0x1E, 0x1E, 0x1E, 0x1E, 0x1F, 0x00, // 4. 4/5 full progress block
 	0x00, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00, // 5. 5/5 full progress block
-};
+      };
 
 
-void Lcd::init (void) {
+    void Lcd::init (void) {
 	/* Init GPIO pins used for LCD interface */
 	/* TODO find a way to make it generic to any GPIO bank */
 	LCD_CLK_ENABLE();
 
 	GPIO_InitStruct.Pin = RsPin | RwPin | EnPin | Db4Pin \
-											| Db5Pin | Db6Pin | Db7Pin;
+			      | Db5Pin | Db6Pin | Db7Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-	
-  HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
+
+	HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
 
 	/* Initialize state of the LCD pins */
-  HAL_GPIO_WritePin(GpioBank, RsPin	| RwPin	| EnPin \
-														| Db4Pin | Db5Pin	| Db6Pin | Db7Pin
-														, GPIO_PIN_RESET); 
+	HAL_GPIO_WritePin(GpioBank, RsPin	| RwPin	| EnPin \
+			  | Db4Pin | Db5Pin	| Db6Pin | Db7Pin
+			  , GPIO_PIN_RESET); 
 
 	/* Wait 100ms for the internal initialisation of the display */
 	HAL_Delay (100);
@@ -137,34 +137,34 @@ void Lcd::init (void) {
 	AddCustomChar(3, 3, CustomChar);
 	AddCustomChar(4, 4, CustomChar);
 	AddCustomChar(5, 5, CustomChar);
-}
+    }
 
-void Lcd::Clear (void) {
+    void Lcd::Clear (void) {
 	WriteCmd (HD44780_CLEAR);
-}
+    }
 
-void Lcd::Print (const char * str) {
+    void Lcd::Print (const char * str) {
 	while (*str) 
-			WriteData (*str++);
-}
+	  WriteData (*str++);
+    }
 
-void Lcd::PrintXY (const char * str, uint8_t x, uint8_t y) {
-		Locate (x, y);
-		Print (str);
-}
+    void Lcd::PrintXY (const char * str, uint8_t x, uint8_t y) {
+	Locate (x, y);
+	Print (str);
+    }
 
-void Lcd::RetHome () {
+    void Lcd::RetHome () {
 	WriteCmd (HD44780_HOME);
-}
+    }
 
-// x range [0:15]
-// y range [0:1], 0 for first line, 1 for second line
-void Lcd::Locate (uint8_t x, uint8_t y) {
+    // x range [0:15]
+    // y range [0:1], 0 for first line, 1 for second line
+    void Lcd::Locate (uint8_t x, uint8_t y) {
 	WriteCmd (HD44780_DDRAM_SET | (x + (0x40 * y)));
 
-}
+    }
 
-void Lcd::ProgressBar (uint32_t progress, uint32_t max_progress, uint8_t lcd_char_length) {
+    void Lcd::ProgressBar (uint32_t progress, uint32_t max_progress, uint8_t lcd_char_length) {
 
 	uint32_t i;
 	uint32_t pixelprogress;
@@ -179,53 +179,53 @@ void Lcd::ProgressBar (uint32_t progress, uint32_t max_progress, uint8_t lcd_cha
 	// total pixel length of bargraph equals length*PROGRESSPIXELS_PER_CHAR;
 	// pixel length of bar itself is
 	pixelprogress = ((progress * ((uint32_t)lcd_char_length * (uint32_t)PROGRESSPIXELS_PER_CHAR)) / max_progress);
-	
+
 	// print exactly "length" characters
 	for(i=0; i<(uint32_t)lcd_char_length; ++i)
-	{
-		// check if this is a full block, or partial or empty
-		// (uint16_t) cast is needed to avoid sign comparison warning
-		if( ((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)+5) > pixelprogress )
-		{
-			// this is a partial or empty block
-			if( ((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)) > pixelprogress )
-			{
-				// this is an empty block
-				// use space character?
-				c = 0;
-			}
-			else
-			{
-				// this is a partial block
-				c = pixelprogress % PROGRESSPIXELS_PER_CHAR;
-			}
-		}
+	  {
+	    // check if this is a full block, or partial or empty
+	    // (uint16_t) cast is needed to avoid sign comparison warning
+	    if( ((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)+5) > pixelprogress )
+	      {
+		// this is a partial or empty block
+		if( ((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)) > pixelprogress )
+		  {
+		    // this is an empty block
+		    // use space character?
+		    c = 0;
+		  }
 		else
-		{
-			// this is a full block
-			c = 5;
-		}
-		
-		// write character to display
-		WriteData (c);
-	}
+		  {
+		    // this is a partial block
+		    c = pixelprogress % PROGRESSPIXELS_PER_CHAR;
+		  }
+	      }
+	    else
+	      {
+		// this is a full block
+		c = 5;
+	      }
 
-}
+	    // write character to display
+	    WriteData (c);
+	  }
 
-void Lcd::AddCustomChar(uint8_t lcd_char_num, uint8_t rom_char_num, const uint8_t * const rom_char_array) {
+    }
+
+    void Lcd::AddCustomChar(uint8_t lcd_char_num, uint8_t rom_char_num, const uint8_t * const rom_char_array) {
 	uint8_t saveDDRAMAddr;
 	uint8_t i;
 	saveDDRAMAddr = ReadBusyFlag () & 0x7F;
 
 	for (i=0; i<8; ++i) {
-		WriteCmd (HD44780_CGRAM_SET | ((lcd_char_num << 3) + i));
-		WriteData (*(rom_char_array + (rom_char_num << 3) + i));
+	    WriteCmd (HD44780_CGRAM_SET | ((lcd_char_num << 3) + i));
+	    WriteData (*(rom_char_array + (rom_char_num << 3) + i));
 	}
 
 	WriteCmd (HD44780_DDRAM_SET | saveDDRAMAddr);
-}
+    }
 
-void Lcd::WriteCmd (uint8_t cmd) {
+    void Lcd::WriteCmd (uint8_t cmd) {
 	HAL_GPIO_WritePin (GpioBank, RsPin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin (GpioBank, RwPin, GPIO_PIN_RESET);
 
@@ -233,9 +233,9 @@ void Lcd::WriteCmd (uint8_t cmd) {
 	WriteCmd4bits (cmd >> 4);  	// high nibble
 	WriteCmd4bits (cmd & 0x0F);	// low nibble
 	while (ReadBusyFlag() & 0x80);
-}
+    }
 
-void Lcd::WriteData (uint8_t data) {
+    void Lcd::WriteData (uint8_t data) {
 	HAL_GPIO_WritePin (GpioBank, RsPin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin (GpioBank, RwPin, GPIO_PIN_RESET);
 
@@ -243,26 +243,26 @@ void Lcd::WriteData (uint8_t data) {
 	WriteCmd4bits (data >> 4);  	// high nibble
 	WriteCmd4bits (data & 0x0F);	// low nibble
 	while (ReadBusyFlag() & 0x80);
-} 
+    } 
 
-/* Busy flag cannot be used */
-void Lcd::WriteCmd4bits (uint8_t cmd) {
+    /* Busy flag cannot be used */
+    void Lcd::WriteCmd4bits (uint8_t cmd) {
 	HAL_GPIO_WritePin (GpioBank, EnPin, GPIO_PIN_SET);
 	HAL_GPIO_WritePin (GpioBank, Db7Pin, (cmd & 0x08) != 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	HAL_GPIO_WritePin (GpioBank, Db6Pin, (cmd & 0x04) != 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	HAL_GPIO_WritePin (GpioBank, Db5Pin, (cmd & 0x02) != 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	HAL_GPIO_WritePin (GpioBank, Db4Pin, (cmd & 0x01) != 0 ? GPIO_PIN_SET : GPIO_PIN_RESET);
 	HAL_GPIO_WritePin (GpioBank, EnPin, GPIO_PIN_RESET);
-}
+    }
 
-uint8_t Lcd::ReadBusyFlag (void) {
+    uint8_t Lcd::ReadBusyFlag (void) {
 	uint8_t status = 0;
 
 	GPIO_InitStruct.Pin =  Db4Pin | Db5Pin | Db6Pin | Db7Pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-  HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
+	HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
 
 	HAL_GPIO_WritePin (GpioBank, RsPin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin (GpioBank, RwPin, GPIO_PIN_SET);
@@ -274,12 +274,12 @@ uint8_t Lcd::ReadBusyFlag (void) {
 	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-  HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
+	HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
 
 	return status;
-}
+    }
 
-uint8_t Lcd::ReadNibble (void) {
+    uint8_t Lcd::ReadNibble (void) {
 	uint8_t val = 0;
 	HAL_GPIO_WritePin (GpioBank, EnPin, GPIO_PIN_SET);
 	val |= HAL_GPIO_ReadPin(GpioBank, Db4Pin);
@@ -288,6 +288,6 @@ uint8_t Lcd::ReadNibble (void) {
 	val |= HAL_GPIO_ReadPin(GpioBank, Db7Pin) << 3;
 	HAL_GPIO_WritePin (GpioBank, EnPin, GPIO_PIN_RESET);
 	return val;
-}
+    }
 
 } // namespace lcd16x2_api 
