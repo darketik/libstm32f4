@@ -24,31 +24,26 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for Base Timer of stm32f407.
+// API Driver for Base Timer used to generate trigger events on TRGO of stm32f407.
 
 #ifndef TIM_BASE_H_
 #define TIM_BASE_H_
 
-#include "stm32f4xx_hal.h"
+#include "libstm32f4.h"
 #include "class_utils.h"
-#include "system.h"
 
 namespace tim_base {
 
-#define TIMx_CLK_ENABLE	__HAL_RCC_TIM3_CLK_ENABLE
-#define TIMx_IRQHandler	TIM3_IRQHandler
-#define TIMx_IRQn	TIM3_IRQn
-
     class TimBase {
     public:
-      TimBase(TIM_TypeDef * TIMx,
+      TimBase (TIM_TypeDef * TIMx,
 	      uint32_t TIMx_clock,
 	      uint32_t TIMx_period) {
 	  this->TIMx = TIMx;
 	  this->TIMx_clock = TIMx_clock;
 	  this->TIMx_period = TIMx_period;
       }
-      ~TimBase() { }
+      ~TimBase () { }
 
       void init (void);
       TIM_HandleTypeDef * getHandle (void);

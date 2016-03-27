@@ -24,14 +24,14 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for RGB LED.
+// API Driver for RGB LED driven in PWM mode.
 //
 
 #include "led_rgb_pwm.h"
 
 namespace led_rgb_pwm {
 
-void LedRgbPwm::init (void) {
+    void LedRgbPwm::init (void) {
 	uint32_t uPrescaler = 0;
 
 	// PWM config 
@@ -57,10 +57,10 @@ void LedRgbPwm::init (void) {
 	TIMx_Handle.Init.Period = pwm_period - 1; 
 	TIMx_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 
-	// HAL_TIM_PWM_MspInit replacement
+	TIMx_CLK_ENABLE (TIMx);
+	GPIOx_CLK_ENABLE (GPIOx);
+
 	GPIO_InitTypeDef  GPIO_InitStruct;
-	TIMx_CLK_ENABLE ();
-	LED_RGB_GPIOx_CLK_ENABLE ();
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
 	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
@@ -70,7 +70,7 @@ void LedRgbPwm::init (void) {
 
 	// below function uses user definition of HAL_TIM_PWM_MspInit
 	if (HAL_TIM_PWM_Init (&TIMx_Handle) != HAL_OK) {
-		Error_Handler ();
+	    Error_Handler ();
 	}
 
 	// configure PWM channels
@@ -80,155 +80,145 @@ void LedRgbPwm::init (void) {
 	TIMx_OC_InitStruct.OCNPolarity = 0; // dummy to bypass assert_param check
 	TIMx_OC_InitStruct.OCNIdleState = 0; // dummy to bypass assert_param check
 	TIMx_OC_InitStruct.OCIdleState = 0; // dummy to bypass assert_param check
-	TIMx_OC_InitStruct.Pulse = TIMx_PWM_DEFAULT_DUTY_CYCLE; 
+	TIMx_OC_InitStruct.Pulse = this->duty_cycle; 
 
 	if (HAL_TIM_PWM_ConfigChannel (&TIMx_Handle, &TIMx_OC_InitStruct, TIM_CHANNEL_1) != HAL_OK)
-	{
-		Error_Handler ();
-	}
+	  {
+	    Error_Handler ();
+	  }
 	if (HAL_TIM_PWM_ConfigChannel (&TIMx_Handle, &TIMx_OC_InitStruct, TIM_CHANNEL_3) != HAL_OK)
-	{
-		Error_Handler ();
-	}
+	  {
+	    Error_Handler ();
+	  }
 	if (HAL_TIM_PWM_ConfigChannel (&TIMx_Handle, &TIMx_OC_InitStruct, TIM_CHANNEL_4) != HAL_OK)
-	{
-		Error_Handler ();
-	}
+	  {
+	    Error_Handler ();
+	  }
 
 	// start PWM channels generation
-  if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_1) != HAL_OK)
-	{
-		Error_Handler ();
-	}
-  if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_3) != HAL_OK)
-	{
-		Error_Handler ();
-	}
-  if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_4) != HAL_OK)
-	{
-		Error_Handler ();
-	}
-}
+	if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_1) != HAL_OK)
+	  {
+	    Error_Handler ();
+	  }
+	if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_3) != HAL_OK)
+	  {
+	    Error_Handler ();
+	  }
+	if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_4) != HAL_OK)
+	  {
+	    Error_Handler ();
+	  }
+    }
 
-// TODO: change duty cycle at a precise end of PWM period
-void LedRgbPwm::setColorDutyCycle (uint32_t color, uint8_t val) {
+    // TODO: change duty cycle at a precise end of PWM period
+    void LedRgbPwm::setColorDutyCycle (uint32_t color, uint8_t val) {
 	switch (color) 
-	{
-		case (RED):
-		{
-			TIMx -> CCR1 = (uint32_t) val;
-		}
-		break;
+	  {
+	  case (RED):
+	      {
+		TIMx -> CCR1 = (uint32_t) val;
+	      }
+	    break;
 
-		case (GREEN):
-		{
-			TIMx -> CCR3 = (uint32_t) val;
-		}
-		break;
+	  case (GREEN):
+	      {
+		TIMx -> CCR3 = (uint32_t) val;
+	      }
+	    break;
 
-		case (BLUE):
-		{
-			TIMx -> CCR4 = (uint32_t) val;
-		}
-		break;
+	  case (BLUE):
+	      {
+		TIMx -> CCR4 = (uint32_t) val;
+	      }
+	    break;
 
-		default: 
-		break;
-	}
-}
+	  default: 
+	    break;
+	  }
+    }
 
-void LedRgbPwm::on (uint32_t color) {
+    void LedRgbPwm::on (uint32_t color) {
 	switch (color) 
-	{
-		case (RED):
-		{
-			if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_1) != HAL_OK)
-			{
-				Error_Handler ();
-			}
-		}
-		break;
+	  {
+	  case (RED):
+	      {
+		if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_1) != HAL_OK)
+		  {
+		    Error_Handler ();
+		  }
+	      }
+	    break;
 
-		case (GREEN):
-		{
-			if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_3) != HAL_OK)
-			{
-				Error_Handler ();
-			}
-		}
-		break;
+	  case (GREEN):
+	      {
+		if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_3) != HAL_OK)
+		  {
+		    Error_Handler ();
+		  }
+	      }
+	    break;
 
-		case (BLUE):
-		{
-			if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_4) != HAL_OK)
-			{
-				Error_Handler ();
-			}
-		}
-		break;
+	  case (BLUE):
+	      {
+		if (HAL_TIM_PWM_Start (&TIMx_Handle, TIM_CHANNEL_4) != HAL_OK)
+		  {
+		    Error_Handler ();
+		  }
+	      }
+	    break;
 
-		default: 
-		break;
-	}
-}
+	  default: 
+	    break;
+	  }
+    }
 
-void LedRgbPwm::off (uint32_t color) {
+    void LedRgbPwm::off (uint32_t color) {
 	switch (color) 
-	{
-		case (RED):
-		{
-			if (HAL_TIM_PWM_Stop (&TIMx_Handle, TIM_CHANNEL_1) != HAL_OK)
-			{
-				Error_Handler ();
-			}
-		}
-		break;
+	  {
+	  case (RED):
+	      {
+		if (HAL_TIM_PWM_Stop (&TIMx_Handle, TIM_CHANNEL_1) != HAL_OK)
+		  {
+		    Error_Handler ();
+		  }
+	      }
+	    break;
 
-		case (GREEN):
-		{
-			if (HAL_TIM_PWM_Stop (&TIMx_Handle, TIM_CHANNEL_3) != HAL_OK)
-			{
-				Error_Handler ();
-			}
-		}
-		break;
+	  case (GREEN):
+	      {
+		if (HAL_TIM_PWM_Stop (&TIMx_Handle, TIM_CHANNEL_3) != HAL_OK)
+		  {
+		    Error_Handler ();
+		  }
+	      }
+	    break;
 
-		case (BLUE):
-		{
-			if (HAL_TIM_PWM_Stop (&TIMx_Handle, TIM_CHANNEL_4) != HAL_OK)
-			{
-				Error_Handler ();
-			}
-		}
-		break;
+	  case (BLUE):
+	      {
+		if (HAL_TIM_PWM_Stop (&TIMx_Handle, TIM_CHANNEL_4) != HAL_OK)
+		  {
+		    Error_Handler ();
+		  }
+	      }
+	    break;
 
-		default: 
-		break;
-	}
-}
+	  default: 
+	    break;
+	  }
+    }
 
 
-} // namespace led_rgb 
+} // namespace led_rgb_pwm
 
-//+ #ifdef __cplusplus
-//+  extern "C" {
-//+ #endif 
+#ifdef __cplusplus
+ extern "C" {
+#endif 
 
 //+ void HAL_TIM_PWM_MspInit(TIM_HandleTypeDef *htim)
 //+ {
-//+   GPIO_InitTypeDef  GPIO_InitStruct;
 
-//+   TIMx_CLK_ENABLE ();
-//+   LED_RGB_GPIOx_CLK_ENABLE ();
-//+   
-//+   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-//+   GPIO_InitStruct.Pull = GPIO_NOPULL;
-//+   GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
-//+   GPIO_InitStruct.Alternate = TIMx_af;
-//+   GPIO_InitStruct.Pin = red_gpio | green_gpio | blue_gpio;
-//+   HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
 //+ }
 
-//+ #ifdef __cplusplus
-//+ }
-//+ #endif
+#ifdef __cplusplus
+}
+#endif

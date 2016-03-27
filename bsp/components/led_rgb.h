@@ -33,41 +33,43 @@
 #ifndef LED_RGB_H_
 #define LED_RGB_H_
 
-#include "stm32f4xx_hal.h"
+#include "libstm32f4.h"
 #include "class_utils.h"
-#include "system.h"
 
 namespace led_rgb {
 
-class LedRgb {
-	public:
-		LedRgb (GPIO_TypeDef *GpioBank, uint16_t RedPin, uint16_t GreenPin, uint16_t BluePin) {
-				this->GpioBank = GpioBank;
-				this->RedPin = RedPin;
-				this->GreenPin = GreenPin;
-				this->BluePin = BluePin;
-			}
-		~LedRgb () {}
+    class LedRgb {
+    public:
+      LedRgb (GPIO_TypeDef *GpioBank,
+	      uint16_t RedPin,
+	      uint16_t GreenPin,
+	      uint16_t BluePin) {
+	  this->GpioBank = GpioBank;
+	  this->RedPin = RedPin;
+	  this->GreenPin = GreenPin;
+	  this->BluePin = BluePin;
+      }
+      ~LedRgb () {}
 
-		void init (void);
-		void SetRed (uint8_t val);
-		void SetGreen (uint8_t val);
-		void SetBlue (uint8_t val);
-		void On (void);
-		void Off (void);
-		
-	private:
-		uint8_t red;
-		uint8_t green;
-		uint8_t blue;
+      void init (void);
+      void SetRed (uint8_t val);
+      void SetGreen (uint8_t val);
+      void SetBlue (uint8_t val);
+      void On (void);
+      void Off (void);
 
-		GPIO_TypeDef *GpioBank;
-		uint16_t RedPin;
-		uint16_t GreenPin;
-		uint16_t BluePin;
+    private:
+      uint8_t red;
+      uint8_t green;
+      uint8_t blue;
 
-		DISALLOW_COPY_AND_ASSIGN (LedRgb);
-};
+      GPIO_TypeDef *GpioBank;
+      uint16_t RedPin;
+      uint16_t GreenPin;
+      uint16_t BluePin;
+
+      DISALLOW_COPY_AND_ASSIGN (LedRgb);
+    };
 
 } // namespace led_rgb 
 

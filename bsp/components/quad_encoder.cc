@@ -24,14 +24,14 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for Base Timer used to generate trigger events on TRGO of stm32f407.
+// API Driver for quadrature encoder sensor with stm32f407.
 //
 
-#include "tim_base.h"
+#include "quad_encoder.h"
 
-namespace tim_base {
+namespace quad_encoder {
 
-    void TimBase::init (void) {
+    void QuadEncoder::init (void) {
 	uint32_t uPrescaler = 0;
 	// To find prescaler value:
 	// TIMx is on APB1 and APB1 clk_div = 4 
@@ -43,38 +43,46 @@ namespace tim_base {
 	// Tick frequency:
 	// Freq = TIMx_CLK / ARR(TIMx_period)
 	SystemCoreClock = HAL_RCC_GetHCLKFreq ();
-	uPrescaler = (uint32_t) ((SystemCoreClock / 2) / TIMx_clock) - 1;
+	uPrescaler = (uint32_t) ((SystemCoreClock / 2) / clock) - 1;
 
-	// configure timer
+	TIMx_CLK_ENABLE (this->TIMx);
+	GPIOx_CLK_ENABLE (this->GPIOx);
+
+	GPIO_InitStruct.Pin = ti1 | ti2;
+	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+	GPIO_InitStruct.Alternate = af;
+
+	HAL_GPIO_Init (GPIOx, &GPIO_InitStruct);
+
 	TIMx_Handle.Instance = TIMx;
 	TIMx_Handle.Init.Prescaler = uPrescaler;
 	TIMx_Handle.Init.CounterMode = TIM_COUNTERMODE_UP;
-	TIMx_Handle.Init.Period = TIMx_period - 1; 
+	TIMx_Handle.Init.Period = period - 1; 
 	TIMx_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 
-	TIMx_CLK_ENABLE (TIMx);
+	TIMx_Handle.Instance = TIMx;
+	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI12;
+	TIM_Encoder_InitStruct.IC1Polarity = TIM_ICPOLARITY_BOTHEDGE;
+	TIM_Encoder_InitStruct.IC1Selection = TIM_ICSELECTION_DIRECTTI;
+	TIM_Encoder_InitStruct.IC1Prescaler = TIM_ICPSC_DIV1;
+	TIM_Encoder_InitStruct.IC1Filter = 0xf;
+	TIM_Encoder_InitStruct.IC2Polarity = TIM_ICPOLARITY_BOTHEDGE;
+	TIM_Encoder_InitStruct.IC2Selection = TIM_ICSELECTION_DIRECTTI;
+	TIM_Encoder_InitStruct.IC2Prescaler = TIM_ICPSC_DIV1;
+	TIM_Encoder_InitStruct.IC2Filter = 0xf;
 
-	// below function uses user definition of HAL_TIM_Base_MspInit
-	if (HAL_TIM_Base_Init (&TIMx_Handle) != HAL_OK) {
+	if (HAL_TIM_Encoder_Init (&TIMx_Handle, &TIM_Encoder_InitStruct) != HAL_OK) {
 	    Error_Handler ();
 	}
 
-	TIMx_MasterConfig_InitStruct.MasterOutputTrigger = TIM_TRGO_UPDATE;
-	TIMx_MasterConfig_InitStruct.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-	HAL_TIMEx_MasterConfigSynchronization (&TIMx_Handle, &TIMx_MasterConfig_InitStruct);
-
-	if (HAL_TIM_Base_Start(&TIMx_Handle) != HAL_OK) {
+	if (HAL_TIM_Encoder_Start(&TIMx_Handle, TIM_CHANNEL_ALL) != HAL_OK) {
 	    Error_Handler ();
 	}
     }
 
-
-    TIM_HandleTypeDef * TimBase::getHandle (void) {
-	return &(this->TIMx_Handle);
-    }
-
-
-} // namespace tim_base 
+} // namespace quad_encoder 
 
 
 
@@ -82,10 +90,9 @@ namespace tim_base {
 extern "C" {
 #endif 
 
-    //+ void HAL_TIM_Base_MspInit (TIM_HandleTypeDef *htim)	
-    //+   {
-    //+   
-    //+   }
+    //+ void HAL_TIM_Encoder_MspInit (ADC_HandleTypeDef* hadc) {
+    //+     
+    //+ }
 
 #ifdef __cplusplus
 }

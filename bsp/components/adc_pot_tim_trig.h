@@ -24,66 +24,71 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for ADC temperature sensor of stm32f407.
+// API Driver for ADC potentiometer.
 
-// For sampling rate = 5 kHz, Timer clock can be 84MHz on TIM3 APB1 with 
+// For sampling rate = 5 kHz, Timer clock can be 84MHz on TIMx APB1 with 
 // ARR = 16800
 
 #ifndef ADC_POT_TIM_TRIG_H_
 #define ADC_POT_TIM_TRIG_H_
 
-#include "stm32f4xx_hal.h"
+#include "libstm32f4.h"
 #include "class_utils.h"
-#include "arm_math.h"
-#include "system.h"
 
 namespace adc_pot_tim_trig {
 
-#define ADCx_DMA_STREAM		DMA2_Stream0
-#define ADCx_DMA_CHANNEL	DMA_CHANNEL_0
-#define ADCx_DMA_CLK_ENABLE 	__HAL_RCC_DMA2_CLK_ENABLE
-#define ADCx_DMA_IRQn		DMA2_Stream0_IRQn
-#define ADCx_DMA_IRQHandler	DMA2_Stream0_IRQHandler
-
-#define ADCx_CHANNEL_GPIOx_CLK_ENABLE  	__HAL_RCC_GPIOC_CLK_ENABLE		
-#define ADCx_GPIO_PIN			GPIO_PIN_1 			
-#define ADCx_GPIO_PORT			GPIOC		
-#define ADCx_CHANNEL			ADC_CHANNEL_11
-
-#define ADCx 			ADC1
-#define ADCx_CLK_ENABLE 	__HAL_RCC_ADC1_CLK_ENABLE
-#define ADCx_FORCE_RESET 	__HAL_RCC_ADC_FORCE_RESET
-#define ADCx_RELEASE_RESET 	__HAL_RCC_ADC_RELEASE_RESET
-#define ADCx_IRQHandler	 	ADC_IRQHandler
-
     class AdcPotTimTrig {
     public:
-      AdcPotTimTrig (float32_t supply
-		     //+ GPIO_TypeDef *gpio_bank,
-		     //+ uint16_t pin,
-		     //+ uint16_t adc_channel
-		     ) {
+      AdcPotTimTrig (ADC_TypeDef * ADCx,
+		     uint32_t adc_channel,
+		     uint32_t adc_ext_trig,
+		     uint32_t adc_sample_time,
+		     DMA_TypeDef * DMAx,
+		     DMA_Stream_TypeDef * dma_stream,
+		     uint32_t dma_channel,
+		     IRQn_Type dma_irqn,
+		     GPIO_TypeDef * GPIOx,
+		     uint16_t gpio_pin,
+		     float32_t supply) {
+	  this->ADCx = ADCx;
+	  this->adc_channel = adc_channel;
+	  this->adc_ext_trig = adc_ext_trig;
+	  this->adc_sample_time = adc_sample_time;
+	  this->DMAx = DMAx;
+	  this->dma_stream = dma_stream;
+	  this->dma_channel = dma_channel;
+	  this->dma_irqn = dma_irqn;
+	  this->GPIOx = GPIOx;
+	  this->gpio_pin = gpio_pin;
 	  this->supply = supply;
-	  //+ this->gpio_bank = gpio_bank;
-	  //+ this->gpio_pin = pin;
-	  //+ this->adc_channel = adc_channel;
       }
       ~AdcPotTimTrig () { }
 
       void init (void);
-      ADC_HandleTypeDef * getAdcHandle(void);
-      float32_t getVoltage(void);
-      uint32_t getAdcValue(void);
+      ADC_HandleTypeDef * getAdcHandle (void);
+      float32_t getVoltage (void);
+      uint32_t getAdcValue (void);
 
     private:
       __IO uint32_t value;
       float32_t supply;
-      //+ GPIO_TypeDef *gpio_bank,
-      //+ uint16_t pin,
-      //+ uint16_t adc_channel;
 
       ADC_HandleTypeDef ADCx_Handle;
       ADC_ChannelConfTypeDef ADCx_ChannelConf;
+      ADC_TypeDef * ADCx;
+      uint32_t adc_channel;
+      uint32_t adc_ext_trig;
+      uint32_t adc_sample_time;
+
+      DMA_HandleTypeDef DMAx_Handle;
+      DMA_TypeDef * DMAx;
+      DMA_Stream_TypeDef * dma_stream;
+      uint32_t dma_channel;
+      IRQn_Type dma_irqn;
+
+      GPIO_InitTypeDef  GPIO_InitStruct;
+      GPIO_TypeDef * GPIOx;
+      uint16_t gpio_pin;
 
       DISALLOW_COPY_AND_ASSIGN (AdcPotTimTrig);
     };

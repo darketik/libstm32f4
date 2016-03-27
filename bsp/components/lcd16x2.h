@@ -30,16 +30,21 @@
 #ifndef LCD16x2_API_H_
 #define LCD16x2_API_H_
 
-#include "stm32f4xx_hal.h"
+#include "libstm32f4.h"
 #include "class_utils.h"
 
 namespace lcd16x2 {
 
-#define LCD_CLK_ENABLE 		__HAL_RCC_GPIOE_CLK_ENABLE
-
     class Lcd {
     public:
-      Lcd (GPIO_TypeDef *GpioBank, uint16_t RsPin, uint16_t RwPin, uint16_t EnPin, uint16_t Db4Pin, uint16_t Db5Pin, uint16_t Db6Pin, uint16_t Db7Pin) {
+      Lcd (GPIO_TypeDef *GpioBank,
+	   uint16_t RsPin,
+	   uint16_t RwPin,
+	   uint16_t EnPin,
+	   uint16_t Db4Pin,
+	   uint16_t Db5Pin,
+	   uint16_t Db6Pin,
+	   uint16_t Db7Pin) {
 	  this->GpioBank = GpioBank;
 	  this->RsPin = RsPin;
 	  this->RwPin = RwPin;
@@ -58,7 +63,7 @@ namespace lcd16x2 {
       void RetHome (void);
       void Locate (uint8_t x, uint8_t y);
       void ProgressBar (uint32_t progress, uint32_t max_progress, uint8_t lcd_char_length);
-      void AddCustomChar(uint8_t lcd_char_num, uint8_t rom_char_num, const uint8_t * const rom_char_array);
+      void AddCustomChar (uint8_t lcd_char_num, uint8_t rom_char_num, const uint8_t * const rom_char_array);
 
     private:
       void WriteCmd (uint8_t cmd);

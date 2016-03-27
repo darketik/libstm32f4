@@ -24,51 +24,61 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for ADC temperature sensor of stm32f407.
-
-//TODO:
-// - Define a sampling rate to process tempsensor measure and configure it
-// using a timer trigger for the ADC
-// For sampling rate = 5 kHz, Timer clock can be 84MHz on TIM3 APB1 with 
+// API Driver for ADC temperature sensor of stm32f407 using timer to trig
+// conversions.
+//
+// For sampling rate = 5 kHz, Timer clock can be 84MHz on TIMx APB1 with 
 // ARR = 16800
 
 #ifndef ADC_TEMP_TIM_TRIG_H_
 #define ADC_TEMP_TIM_TRIG_H_
 
-#include "stm32f4xx_hal.h"
+#include "libstm32f4.h"
 #include "class_utils.h"
-#include "arm_math.h"
-#include "system.h"
 
 namespace adc_temp_tim_trig {
 
-#define ADCx_DMA_STREAM		DMA2_Stream0
-#define ADCx_DMA_CHANNEL	DMA_CHANNEL_0
-#define ADCx_DMA_CLK_ENABLE 	__HAL_RCC_DMA2_CLK_ENABLE
-#define ADCx_DMA_IRQn		DMA2_Stream0_IRQn
-#define ADCx_DMA_IRQHandler	DMA2_Stream0_IRQHandler
-
-#define ADCx 			ADC1
-#define ADCx_CLK_ENABLE 	__HAL_RCC_ADC1_CLK_ENABLE
-#define ADCx_CHANNEL		ADC_CHANNEL_TEMPSENSOR
-#define ADCx_FORCE_RESET 	__HAL_RCC_ADC_FORCE_RESET
-#define ADCx_RELEASE_RESET 	__HAL_RCC_ADC_RELEASE_RESET
-#define ADCx_IRQHandler	 	ADC_IRQHandler
-
     class AdcTempTimTrig {
     public:
-      AdcTempTimTrig() { }
-      ~AdcTempTimTrig() { }
+      AdcTempTimTrig (ADC_TypeDef * ADCx,
+		     uint32_t adc_channel,
+		     uint32_t adc_ext_trig,
+		     uint32_t adc_sample_time,
+		     DMA_TypeDef * DMAx,
+		     DMA_Stream_TypeDef * dma_stream,
+		     uint32_t dma_channel,
+		     IRQn_Type dma_irqn) {
+	  this->ADCx = ADCx;
+	  this->adc_channel = adc_channel;
+	  this->adc_ext_trig = adc_ext_trig;
+	  this->adc_sample_time = adc_sample_time;
+	  this->DMAx = DMAx;
+	  this->dma_stream = dma_stream;
+	  this->dma_channel = dma_channel;
+	  this->dma_irqn = dma_irqn;
+      }
+      ~AdcTempTimTrig () { }
 
       void init (void);
-      ADC_HandleTypeDef * getAdcHandle(void);
-      float32_t getTemp(void);
-      uint32_t getAdcValue(void);
+      ADC_HandleTypeDef * getAdcHandle (void);
+      float32_t getTemp (void);
+      uint32_t getAdcValue (void);
 
     private:
       __IO uint32_t temp;
+
       ADC_HandleTypeDef ADCx_Handle;
       ADC_ChannelConfTypeDef ADCx_ChannelConf;
+      ADC_TypeDef * ADCx;
+      uint32_t adc_channel;
+      uint32_t adc_ext_trig;
+      uint32_t adc_sample_time;
+
+      DMA_HandleTypeDef DMAx_Handle;
+      DMA_TypeDef * DMAx;
+      DMA_Stream_TypeDef * dma_stream;
+      uint32_t dma_channel;
+      IRQn_Type dma_irqn;
 
       DISALLOW_COPY_AND_ASSIGN (AdcTempTimTrig);
     };

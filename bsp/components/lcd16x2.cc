@@ -81,8 +81,7 @@ namespace lcd16x2 {
 
     void Lcd::init (void) {
 	/* Init GPIO pins used for LCD interface */
-	/* TODO find a way to make it generic to any GPIO bank */
-	LCD_CLK_ENABLE();
+	GPIOx_CLK_ENABLE (GpioBank);
 
 	GPIO_InitStruct.Pin = RsPin | RwPin | EnPin | Db4Pin \
 			      | Db5Pin | Db6Pin | Db7Pin;
@@ -161,11 +160,9 @@ namespace lcd16x2 {
     // y range [0:1], 0 for first line, 1 for second line
     void Lcd::Locate (uint8_t x, uint8_t y) {
 	WriteCmd (HD44780_DDRAM_SET | (x + (0x40 * y)));
-
     }
 
     void Lcd::ProgressBar (uint32_t progress, uint32_t max_progress, uint8_t lcd_char_length) {
-
 	uint32_t i;
 	uint32_t pixelprogress;
 	uint8_t c;
@@ -181,11 +178,11 @@ namespace lcd16x2 {
 	pixelprogress = ((progress * ((uint32_t)lcd_char_length * (uint32_t)PROGRESSPIXELS_PER_CHAR)) / max_progress);
 
 	// print exactly "length" characters
-	for(i=0; i<(uint32_t)lcd_char_length; ++i)
+	for (i=0; i<(uint32_t)lcd_char_length; ++i)
 	  {
 	    // check if this is a full block, or partial or empty
 	    // (uint16_t) cast is needed to avoid sign comparison warning
-	    if( ((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)+5) > pixelprogress )
+	    if (((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)+5) > pixelprogress )
 	      {
 		// this is a partial or empty block
 		if( ((i*(uint32_t)PROGRESSPIXELS_PER_CHAR)) > pixelprogress )
@@ -212,7 +209,7 @@ namespace lcd16x2 {
 
     }
 
-    void Lcd::AddCustomChar(uint8_t lcd_char_num, uint8_t rom_char_num, const uint8_t * const rom_char_array) {
+    void Lcd::AddCustomChar (uint8_t lcd_char_num, uint8_t rom_char_num, const uint8_t * const rom_char_array) {
 	uint8_t saveDDRAMAddr;
 	uint8_t i;
 	saveDDRAMAddr = ReadBusyFlag () & 0x7F;
@@ -290,4 +287,4 @@ namespace lcd16x2 {
 	return val;
     }
 
-} // namespace lcd16x2_api 
+} // namespace lcd16x2

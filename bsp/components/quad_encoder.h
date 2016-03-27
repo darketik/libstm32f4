@@ -24,52 +24,57 @@
 //
 // -----------------------------------------------------------------------------
 //
-// API Driver for RGB LED.
-//
+// API Driver for quadrature encoder sensor with stm32f407.
 
-#include "led_rgb.h"
+#ifndef QUAD_ENCODER_H_
+#define QUAD_ENCODER_H_
 
-namespace led_rgb {
+#include "libstm32f4.h"
+#include "class_utils.h"
 
-    void LedRgb::init (void) {
-	GPIO_InitTypeDef  GPIO_InitStruct;
+namespace quad_encoder {
 
-	/* Init GPIO pins used for LCD interface */
-	GPIOx_CLK_ENABLE (GpioBank);
+    class QuadEncoder {
+    public:
+      QuadEncoder (
+		   GPIO_TypeDef * GPIOx,
+		   uint16_t ti1,
+		   uint16_t ti2,
+		   uint8_t af,
+		   TIM_TypeDef * TIMx,
+		   uint32_t period,
+		   uint32_t clock
+      ) {
+	  this->GPIOx = GPIOx;
+	  this->ti1 = ti1;
+	  this->ti2 = ti2;
+	  this->af = af;
 
-	GPIO_InitStruct.Pin = RedPin | GreenPin | BluePin;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+	  this->TIMx = TIMx;
+	  this->period = period;
+	  this->clock = clock;
+      }
+      ~QuadEncoder () { }
 
-	HAL_GPIO_Init(GpioBank, &GPIO_InitStruct);
+      void init (void);
 
-	/* Initialize state of the LCD pins */
-	Off ();
+    private:
+      GPIO_TypeDef * GPIOx;
+      uint16_t ti1;
+      uint16_t ti2;
+      uint8_t af;
 
-	/* Wait 100ms */
-	HAL_Delay (100);
-    }
+      TIM_TypeDef * TIMx;
+      uint32_t period;
+      uint32_t clock;
 
-    void LedRgb::SetRed (uint8_t val) {
-	HAL_GPIO_WritePin(GpioBank, RedPin, GPIO_PIN_RESET); 
-    }
+      GPIO_InitTypeDef  GPIO_InitStruct;
+      TIM_HandleTypeDef TIMx_Handle;
+      TIM_Encoder_InitTypeDef TIM_Encoder_InitStruct;
 
-    void LedRgb::SetGreen (uint8_t val) {
-	HAL_GPIO_WritePin(GpioBank, GreenPin, GPIO_PIN_RESET); 
-    }
+      DISALLOW_COPY_AND_ASSIGN (QuadEncoder);
+    };
 
-    void LedRgb::SetBlue (uint8_t val) {
-	HAL_GPIO_WritePin(GpioBank, BluePin, GPIO_PIN_RESET); 
-    }
+} // namespace quad_encoder 
 
-    void LedRgb::On (void) {
-	HAL_GPIO_WritePin(GpioBank, RedPin | GreenPin | BluePin, GPIO_PIN_RESET); 
-    }
-
-    void LedRgb::Off (void) {
-	HAL_GPIO_WritePin(GpioBank, RedPin | GreenPin | BluePin, GPIO_PIN_SET); 
-    }
-
-
-} // namespace led_rgb 
+#endif // QUAD_ENCODER_H_
