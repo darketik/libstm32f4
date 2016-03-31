@@ -107,15 +107,15 @@ namespace quad_encoder {
 	TIMx_Handle.Init.Period = this->period - 1; 
 	TIMx_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 
-	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI12;
-	TIM_Encoder_InitStruct.IC1Polarity = TIM_ICPOLARITY_BOTHEDGE;
+	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI1;
+	TIM_Encoder_InitStruct.IC1Polarity = TIM_ICPOLARITY_RISING;
 	TIM_Encoder_InitStruct.IC1Selection = TIM_ICSELECTION_DIRECTTI;
 	TIM_Encoder_InitStruct.IC1Prescaler = TIM_ICPSC_DIV1;
-	TIM_Encoder_InitStruct.IC1Filter = 0x0;
-	TIM_Encoder_InitStruct.IC2Polarity = TIM_ICPOLARITY_BOTHEDGE;
+	TIM_Encoder_InitStruct.IC1Filter = 0x3;
+	TIM_Encoder_InitStruct.IC2Polarity = TIM_ICPOLARITY_RISING;
 	TIM_Encoder_InitStruct.IC2Selection = TIM_ICSELECTION_DIRECTTI;
 	TIM_Encoder_InitStruct.IC2Prescaler = TIM_ICPSC_DIV1;
-	TIM_Encoder_InitStruct.IC2Filter = 0x0;
+	TIM_Encoder_InitStruct.IC2Filter = 0x3;
 
 	// NVIC config
 	//+ HAL_NVIC_SetPriority (this->tim_irqn, 0, 0);
