@@ -33,14 +33,14 @@ namespace adc_pot_tim_trig {
 
     void AdcPotTimTrig::init (void) {
 	// init GPIO clock
-	GPIOx_CLK_ENABLE (GPIOx);
+	GPIOx_CLK_ENABLE (this->GPIOx);
 
 	// init ADCx clock
-	ADCx_CLK_ENABLE (ADCx);
+	ADCx_CLK_ENABLE (this->ADCx);
 
 	// init DMAx CLK, streams, link DMA HAndle, set priority and enable transfer
 	// complete IT on the streams. 
-	DMAx_CLK_ENABLE (DMAx);
+	DMAx_CLK_ENABLE (this->DMAx);
 
 	GPIO_InitStruct.Pin = this->gpio_pin;
 	GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
@@ -70,7 +70,7 @@ namespace adc_pot_tim_trig {
 	// link DMA handle to ADC Handle
 	__HAL_LINKDMA (&this->ADCx_Handle, DMA_Handle, this->DMAx_Handle);
 
-	// NVIC for DMA transvfer complete IT
+	// NVIC for DMA transfer complete IT
 	HAL_NVIC_SetPriority (this->dma_irqn, 0, 0);
 	HAL_NVIC_EnableIRQ (this->dma_irqn);
 

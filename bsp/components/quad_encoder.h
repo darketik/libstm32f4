@@ -36,41 +36,78 @@ namespace quad_encoder {
 
     class QuadEncoder {
     public:
-      QuadEncoder (
-		   GPIO_TypeDef * GPIOx,
+      QuadEncoder (GPIO_TypeDef * GPIOx,
 		   uint16_t ti1,
 		   uint16_t ti2,
 		   uint8_t af,
+		   DMA_TypeDef * DMAx,
+		   DMA_Stream_TypeDef * dma_stream [2],
+		   uint32_t dma_channel [2],
+		   IRQn_Type dma_irqn [2],
 		   TIM_TypeDef * TIMx,
 		   uint32_t period,
-		   uint32_t clock
+		   uint32_t clock,
+		   IRQn_Type tim_irqn
       ) {
 	  this->GPIOx = GPIOx;
 	  this->ti1 = ti1;
 	  this->ti2 = ti2;
 	  this->af = af;
 
+	  this->DMAx = DMAx;
+	  this->dma_stream[0] = dma_stream[0];
+	  this->dma_stream[1] = dma_stream[1];
+	  this->dma_channel[0] = dma_channel[0];
+	  this->dma_channel[1] = dma_channel[1];
+	  this->dma_irqn[0] = dma_irqn[0];
+	  this->dma_irqn[1] = dma_irqn[1];
+
 	  this->TIMx = TIMx;
 	  this->period = period;
 	  this->clock = clock;
+	  this->tim_irqn = tim_irqn;
+	  //+ encoder_value = 64;
+	  //+ encoded = 0;
+	  //+ last_encoded = 0;
+	  //+ cat = 0;
       }
       ~QuadEncoder () { }
 
       void init (void);
+      TIM_HandleTypeDef * getTimHandle (void);
+      uint16_t getCounter (void);
+      uint32_t getIc1 (void);
+      uint32_t getIc2 (void);
+      //+ uint32_t getPosition (void);
 
     private:
+      __IO uint32_t ic1;
+      __IO uint32_t ic2;
+
+      //+ __IO uint16_t encoder_value;
+      //+ __IO uint32_t encoded;
+      //+ __IO uint32_t last_encoded;
+      //+ __IO uint32_t cat;
+
+      GPIO_InitTypeDef  GPIO_InitStruct;
       GPIO_TypeDef * GPIOx;
       uint16_t ti1;
       uint16_t ti2;
       uint8_t af;
 
+      DMA_HandleTypeDef DMAx_Handle[2];
+      DMA_TypeDef * DMAx;
+      DMA_Stream_TypeDef * dma_stream [2];
+      uint32_t dma_channel [2];
+      IRQn_Type dma_irqn [2];
+
+      TIM_HandleTypeDef TIMx_Handle;
+      //+ TIM_MasterConfigTypeDef TIMx_MasterConfig_InitStruct;
+      TIM_Encoder_InitTypeDef TIM_Encoder_InitStruct;
       TIM_TypeDef * TIMx;
       uint32_t period;
       uint32_t clock;
-
-      GPIO_InitTypeDef  GPIO_InitStruct;
-      TIM_HandleTypeDef TIMx_Handle;
-      TIM_Encoder_InitTypeDef TIM_Encoder_InitStruct;
+      IRQn_Type tim_irqn;
 
       DISALLOW_COPY_AND_ASSIGN (QuadEncoder);
     };
