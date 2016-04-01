@@ -41,13 +41,12 @@ namespace quad_encoder {
 		   uint16_t ti2,
 		   uint8_t af,
 		   DMA_TypeDef * DMAx,
-		   DMA_Stream_TypeDef * dma_stream [2],
-		   uint32_t dma_channel [2],
-		   IRQn_Type dma_irqn [2],
+		   DMA_Stream_TypeDef * dma_stream,
+		   uint32_t dma_channel,
+		   IRQn_Type dma_irqn,
 		   TIM_TypeDef * TIMx,
 		   uint32_t period,
-		   uint32_t clock,
-		   IRQn_Type tim_irqn
+		   uint32_t clock
       ) {
 	  this->GPIOx = GPIOx;
 	  this->ti1 = ti1;
@@ -55,17 +54,13 @@ namespace quad_encoder {
 	  this->af = af;
 
 	  this->DMAx = DMAx;
-	  this->dma_stream[0] = dma_stream[0];
-	  this->dma_stream[1] = dma_stream[1];
-	  this->dma_channel[0] = dma_channel[0];
-	  this->dma_channel[1] = dma_channel[1];
-	  this->dma_irqn[0] = dma_irqn[0];
-	  this->dma_irqn[1] = dma_irqn[1];
+	  this->dma_stream = dma_stream;
+	  this->dma_channel = dma_channel;
+	  this->dma_irqn = dma_irqn;
 
 	  this->TIMx = TIMx;
 	  this->period = period;
 	  this->clock = clock;
-	  this->tim_irqn = tim_irqn;
 	  encoder_value = 64;
 	  old_counter= 0x8000;
       }
@@ -78,7 +73,6 @@ namespace quad_encoder {
 
     private:
       __IO uint32_t ic1;
-      __IO uint32_t ic2;
       uint16_t encoder_value;
       uint16_t old_counter;
 
@@ -88,18 +82,17 @@ namespace quad_encoder {
       uint16_t ti2;
       uint8_t af;
 
-      DMA_HandleTypeDef DMAx_Handle[2];
+      DMA_HandleTypeDef DMAx_Handle;
       DMA_TypeDef * DMAx;
-      DMA_Stream_TypeDef * dma_stream [2];
-      uint32_t dma_channel [2];
-      IRQn_Type dma_irqn [2];
+      DMA_Stream_TypeDef * dma_stream;
+      uint32_t dma_channel;
+      IRQn_Type dma_irqn;
 
       TIM_HandleTypeDef TIMx_Handle;
       TIM_Encoder_InitTypeDef TIM_Encoder_InitStruct;
       TIM_TypeDef * TIMx;
       uint32_t period;
       uint32_t clock;
-      IRQn_Type tim_irqn;
 
       DISALLOW_COPY_AND_ASSIGN (QuadEncoder);
     };

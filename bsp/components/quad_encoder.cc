@@ -45,49 +45,28 @@ namespace quad_encoder {
 	GPIO_InitStruct.Alternate = this->af;
 	HAL_GPIO_Init (this->GPIOx, &this->GPIO_InitStruct);
 
-	DMAx_Handle[0].Init.Direction = DMA_PERIPH_TO_MEMORY;
-	DMAx_Handle[0].Init.PeriphInc = DMA_PINC_DISABLE;
-	DMAx_Handle[0].Init.MemInc = DMA_MINC_ENABLE;
-	DMAx_Handle[0].Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-	DMAx_Handle[0].Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-	DMAx_Handle[0].Init.Mode = DMA_CIRCULAR;
-	DMAx_Handle[0].Init.Priority = DMA_PRIORITY_HIGH;
-	DMAx_Handle[0].Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-	DMAx_Handle[0].Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
-	DMAx_Handle[0].Init.MemBurst = DMA_MBURST_SINGLE;
-	DMAx_Handle[0].Init.PeriphBurst = DMA_PBURST_SINGLE;
-	DMAx_Handle[0].Instance = this->dma_stream[0];
-	DMAx_Handle[0].Init.Channel = this->dma_channel[0];
-	if (HAL_DMA_Init (&this->DMAx_Handle[0]) != HAL_OK) {
+	DMAx_Handle.Init.Direction = DMA_PERIPH_TO_MEMORY;
+	DMAx_Handle.Init.PeriphInc = DMA_PINC_DISABLE;
+	DMAx_Handle.Init.MemInc = DMA_MINC_ENABLE;
+	DMAx_Handle.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+	DMAx_Handle.Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
+	DMAx_Handle.Init.Mode = DMA_CIRCULAR;
+	DMAx_Handle.Init.Priority = DMA_PRIORITY_HIGH;
+	DMAx_Handle.Init.FIFOMode = DMA_FIFOMODE_DISABLE;
+	DMAx_Handle.Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
+	DMAx_Handle.Init.MemBurst = DMA_MBURST_SINGLE;
+	DMAx_Handle.Init.PeriphBurst = DMA_PBURST_SINGLE;
+	DMAx_Handle.Instance = this->dma_stream;
+	DMAx_Handle.Init.Channel = this->dma_channel;
+	if (HAL_DMA_Init (&this->DMAx_Handle) != HAL_OK) {
 	    Error_Handler ();
 	}
 	// link DMA handle to TIMx Handle
-	__HAL_LINKDMA (&this->TIMx_Handle, hdma[TIM_DMA_ID_CC1], this->DMAx_Handle[0]);
-
-	DMAx_Handle[1].Init.Direction = DMA_PERIPH_TO_MEMORY;
-	DMAx_Handle[1].Init.PeriphInc = DMA_PINC_DISABLE;
-	DMAx_Handle[1].Init.MemInc = DMA_MINC_ENABLE;
-	DMAx_Handle[1].Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
-	DMAx_Handle[1].Init.MemDataAlignment = DMA_MDATAALIGN_WORD;
-	DMAx_Handle[1].Init.Mode = DMA_CIRCULAR;
-	DMAx_Handle[1].Init.Priority = DMA_PRIORITY_HIGH;
-	DMAx_Handle[1].Init.FIFOMode = DMA_FIFOMODE_DISABLE;
-	DMAx_Handle[1].Init.FIFOThreshold = DMA_FIFO_THRESHOLD_HALFFULL;
-	DMAx_Handle[1].Init.MemBurst = DMA_MBURST_SINGLE;
-	DMAx_Handle[1].Init.PeriphBurst = DMA_PBURST_SINGLE;
-	DMAx_Handle[1].Instance = this->dma_stream[1];
-	DMAx_Handle[1].Init.Channel = this->dma_channel[1];
-	if (HAL_DMA_Init (&this->DMAx_Handle[1]) != HAL_OK) {
-	    Error_Handler ();
-	}
-	// link DMA handle to TIMx Handle
-	__HAL_LINKDMA (&this->TIMx_Handle, hdma[TIM_DMA_ID_CC2], this->DMAx_Handle[1]);
+	__HAL_LINKDMA (&this->TIMx_Handle, hdma[TIM_DMA_ID_CC1], this->DMAx_Handle);
 
 	// NVIC for DMA transfer complete IT
-	HAL_NVIC_SetPriority (this->dma_irqn[0], 0, 0);
-	HAL_NVIC_EnableIRQ (this->dma_irqn[0]);
-	HAL_NVIC_SetPriority (this->dma_irqn[1], 0, 1);
-	HAL_NVIC_EnableIRQ (this->dma_irqn[1]);
+	HAL_NVIC_SetPriority (this->dma_irqn, 0, 0);
+	HAL_NVIC_EnableIRQ (this->dma_irqn);
 
 	// To find prescaler value:
 	// TIMx is on APB1 and APB1 clk_div = 4 
@@ -107,7 +86,7 @@ namespace quad_encoder {
 	TIMx_Handle.Init.Period = this->period - 1; 
 	TIMx_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 
-	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI12;
+	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI1;
 	TIM_Encoder_InitStruct.IC1Polarity = TIM_ICPOLARITY_RISING;
 	TIM_Encoder_InitStruct.IC1Selection = TIM_ICSELECTION_DIRECTTI;
 	TIM_Encoder_InitStruct.IC1Prescaler = TIM_ICPSC_DIV1;
@@ -123,7 +102,7 @@ namespace quad_encoder {
 
 	__HAL_TIM_SET_COUNTER (&this->TIMx_Handle, 0x8000);
 
-	if (HAL_TIM_Encoder_Start_DMA (&TIMx_Handle, TIM_CHANNEL_ALL, (uint32_t*)&ic1, (uint32_t*)&ic2, 1) != HAL_OK) {
+	if (HAL_TIM_Encoder_Start_DMA (&TIMx_Handle, TIM_CHANNEL_1, (uint32_t*)&ic1, (uint32_t*)&ic1, 1) != HAL_OK) {
 	    Error_Handler ();
 	}
     }
@@ -142,7 +121,10 @@ namespace quad_encoder {
     uint32_t QuadEncoder::getPosition (void) {
 	uint32_t _temp;
 
+	//+ if (this->TIMx_Handle.Channel ==  HAL_TIM_ACTIVE_CHANNEL_1)
 	_temp = this->ic1;
+	//+ else 
+	//+ _temp = this->ic2;
 
 	if (_temp > this->old_counter) {
 	    if (this->encoder_value != 127) {

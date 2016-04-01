@@ -488,7 +488,7 @@ $(DEP_FILE): $(BUILD_DIR) $(BUILD_OBJ) $(LIBDIR) $(DEPS)
 	@echo "Creating file: $@"
 	@cat $(DEPS) > $(DEP_FILE)
 
-$(BUILD_DIR)%.elf: $(OBJS)
+$(BUILD_DIR)%.elf: $(OBJS) $(LIBS)
 	@echo "[LD] $@"
 	@$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
