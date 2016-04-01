@@ -66,28 +66,21 @@ namespace quad_encoder {
 	  this->period = period;
 	  this->clock = clock;
 	  this->tim_irqn = tim_irqn;
-	  //+ encoder_value = 64;
-	  //+ encoded = 0;
-	  //+ last_encoded = 0;
-	  //+ cat = 0;
+	  encoder_value = 64;
+	  old_counter= 0x8000;
       }
       ~QuadEncoder () { }
 
       void init (void);
       TIM_HandleTypeDef * getTimHandle (void);
       uint16_t getCounter (void);
-      uint32_t getIc1 (void);
-      uint32_t getIc2 (void);
-      //+ uint32_t getPosition (void);
+      uint32_t getPosition (void);
 
     private:
       __IO uint32_t ic1;
       __IO uint32_t ic2;
-
-      //+ __IO uint16_t encoder_value;
-      //+ __IO uint32_t encoded;
-      //+ __IO uint32_t last_encoded;
-      //+ __IO uint32_t cat;
+      uint16_t encoder_value;
+      uint16_t old_counter;
 
       GPIO_InitTypeDef  GPIO_InitStruct;
       GPIO_TypeDef * GPIOx;
@@ -102,7 +95,6 @@ namespace quad_encoder {
       IRQn_Type dma_irqn [2];
 
       TIM_HandleTypeDef TIMx_Handle;
-      //+ TIM_MasterConfigTypeDef TIMx_MasterConfig_InitStruct;
       TIM_Encoder_InitTypeDef TIM_Encoder_InitStruct;
       TIM_TypeDef * TIMx;
       uint32_t period;

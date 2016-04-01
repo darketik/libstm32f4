@@ -40,7 +40,7 @@ namespace quad_encoder {
 
 	GPIO_InitStruct.Pin = this->ti1 | this->ti2;
 	GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Pull = GPIO_NOPULL;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.Alternate = this->af;
 	HAL_GPIO_Init (this->GPIOx, &this->GPIO_InitStruct);
@@ -107,34 +107,26 @@ namespace quad_encoder {
 	TIMx_Handle.Init.Period = this->period - 1; 
 	TIMx_Handle.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
 
-	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI1;
+	TIM_Encoder_InitStruct.EncoderMode = TIM_ENCODERMODE_TI12;
 	TIM_Encoder_InitStruct.IC1Polarity = TIM_ICPOLARITY_RISING;
 	TIM_Encoder_InitStruct.IC1Selection = TIM_ICSELECTION_DIRECTTI;
 	TIM_Encoder_InitStruct.IC1Prescaler = TIM_ICPSC_DIV1;
-	TIM_Encoder_InitStruct.IC1Filter = 0x3;
+	TIM_Encoder_InitStruct.IC1Filter = 0x0;
 	TIM_Encoder_InitStruct.IC2Polarity = TIM_ICPOLARITY_RISING;
 	TIM_Encoder_InitStruct.IC2Selection = TIM_ICSELECTION_DIRECTTI;
 	TIM_Encoder_InitStruct.IC2Prescaler = TIM_ICPSC_DIV1;
-	TIM_Encoder_InitStruct.IC2Filter = 0x3;
-
-	// NVIC config
-	//+ HAL_NVIC_SetPriority (this->tim_irqn, 0, 0);
-	//+ HAL_NVIC_EnableIRQ (this->tim_irqn);
+	TIM_Encoder_InitStruct.IC2Filter = 0x0;
 
 	if (HAL_TIM_Encoder_Init (&this->TIMx_Handle, &this->TIM_Encoder_InitStruct) != HAL_OK) {
 	    Error_Handler ();
 	}
 
-	//+ TIMx_MasterConfig_InitStruct.MasterOutputTrigger = TIM_TRGO_RESET;
-	//+ TIMx_MasterConfig_InitStruct.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-	//+ HAL_TIMEx_MasterConfigSynchronization (&TIMx_Handle, &TIMx_MasterConfig_InitStruct);
+	__HAL_TIM_SET_COUNTER (&this->TIMx_Handle, 0x8000);
 
-	//+ if (HAL_TIM_Encoder_Start_IT (&this->TIMx_Handle, TIM_CHANNEL_ALL) != HAL_OK) {
 	if (HAL_TIM_Encoder_Start_DMA (&TIMx_Handle, TIM_CHANNEL_ALL, (uint32_t*)&ic1, (uint32_t*)&ic2, 1) != HAL_OK) {
 	    Error_Handler ();
 	}
     }
-
 
 
    TIM_HandleTypeDef * QuadEncoder::getTimHandle (void) {
@@ -147,23 +139,36 @@ namespace quad_encoder {
     }
 
 
-   uint32_t QuadEncoder::getIc1 (void) {
-	return this->ic1;
+    uint32_t QuadEncoder::getPosition (void) {
+	uint32_t _temp;
+
+	_temp = this->ic1;
+
+	if (_temp > this->old_counter) {
+	    if (this->encoder_value != 127) {
+		this->encoder_value++;
+		this->old_counter = _temp;
+	    }
+	    else {
+		this->old_counter = 0x8000;
+		__HAL_TIM_SET_COUNTER (&this->TIMx_Handle, 0x8000);
+	    }
+	}
+	else {
+	    if (_temp < this->old_counter) {
+		if (this->encoder_value != 0) {
+		    this->encoder_value--;
+		    this->old_counter = _temp;
+		}
+		else {
+		    this->old_counter = 0x8000;
+		    __HAL_TIM_SET_COUNTER (&this->TIMx_Handle, 0x8000);
+		}
+	    }
+	}
+
+	return this->encoder_value;
     }
-
-
-   uint32_t QuadEncoder::getIc2 (void) {
-	return this->ic2;
-    }
-
-   //+ uint32_t QuadEncoder::getPosition (void) {
-   //+      this->encoded = (this->ic2 << 1) | this->ic1;
-   //+      this->cat = (this->last_encoded << 2) | this->encoded;
-   //+      if (this->cat == 0b0010 || this->cat == 0b0100 || this->cat == 0b1011 || this->cat == 0b1101) this->encoder_value++;
-   //+      if (this->cat == 0b0001 || this->cat == 0b0111 || this->cat == 0b1000 || this->cat == 0b1110) this->encoder_value++;
-   //+      this->last_encoded = this->encoded;
-   //+      return this->encoder_value;
-   //+  }
 
 } // namespace quad_encoder 
 
